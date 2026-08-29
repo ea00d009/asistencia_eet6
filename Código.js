@@ -92,6 +92,18 @@ const HORARIOS = {
 };
 
 /**
+ * Normaliza cadenas quitando tildes, espacios extras y pasando a minúsculas
+ */
+function normalizarTextoServidor(str) {
+  if (!str) return "";
+  return str.toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+/**
  * Carga todos los datos necesarios en una sola lectura de la planilla.
  */
 function getInitialData() {
@@ -102,6 +114,36 @@ function getInitialData() {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) {
     return { docentes: [], registros: [], horarios: HORARIOS, asistenciasHoy: [] };
+  }
+
+  // Mapa de inasistencias y tardanzas acumuladas por alumno desde Asistencia_Historica
+  const histSheet = ss.getSheetByName('Asistencia_Historica');
+  const inasistenciasMap = {};
+  
+  if (histSheet && histSheet.getLastRow() >= 2) {
+    const histLastRow = histSheet.getLastRow();
+    const numHistRows = Math.min(histLastRow - 1, 5000);
+    const histStartRow = histLastRow - numHistRows + 1;
+    const histData = histSheet.getRange(histStartRow, 1, numHistRows, 8).getDisplayValues();
+    
+    for (let h = 0; h < histData.length; h++) {
+      const alumnoNombre = histData[h][5] ? histData[h][5].toString().trim() : "";
+      const cursoNombre = histData[h][3] ? histData[h][3].toString().trim() : "";
+      const estado = histData[h][6] ? histData[h][6].toString().trim().toLowerCase() : "";
+      
+      if (!alumnoNombre) continue;
+      
+      const key = `${normalizarTextoServidor(alumnoNombre)}|${normalizarTextoServidor(cursoNombre)}`;
+      if (!inasistenciasMap[key]) {
+        inasistenciasMap[key] = { ausentes: 0, tardanzas: 0 };
+      }
+      
+      if (estado === 'ausente') {
+        inasistenciasMap[key].ausentes++;
+      } else if (estado === 'tardanza') {
+        inasistenciasMap[key].tardanzas++;
+      }
+    }
   }
   
   const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
@@ -120,13 +162,18 @@ function getInitialData() {
     if (docente) docentesSet.add(docente);
     
     if (nombre && curso && docente) {
+      const keyStats = `${normalizarTextoServidor(nombre)}|${normalizarTextoServidor(curso)}`;
+      const statsAlumno = inasistenciasMap[keyStats] || { ausentes: 0, tardanzas: 0 };
+
       registros.push({
         id: id,
         n: nombre,
         c: curso,
         t: taller,
         d: docente,
-        u: turno
+        u: turno,
+        aus: statsAlumno.ausentes,
+        tar: statsAlumno.tardanzas
       });
     }
   }
@@ -141,18 +188,6 @@ function getInitialData() {
     fechaHoyStr: hoyStr,
     asistenciasHoy: asistenciasHoy
   };
-}
-
-/**
- * Normaliza cadenas quitando tildes, espacios extras y pasando a minúsculas
- */
-function normalizarTextoServidor(str) {
-  if (!str) return "";
-  return str.toString()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase();
 }
 
 /**

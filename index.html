@@ -292,6 +292,51 @@
       word-break: break-word;
     }
 
+    /* Badge de Inasistencias y Tardanzas por Alumno */
+    .attendance-stat-badge {
+      font-size: 0.76rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 4px;
+      vertical-align: baseline;
+    }
+
+    .attendance-stat-badge.stat-clean {
+      color: var(--text-muted);
+      opacity: 0.7;
+      font-weight: 500;
+    }
+
+    .attendance-stat-badge.stat-normal {
+      color: var(--text-main);
+    }
+
+    .attendance-stat-badge.stat-warning {
+      background: rgba(245, 158, 11, 0.12);
+      padding: 1px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .attendance-stat-badge.stat-critical {
+      background: rgba(239, 68, 68, 0.12);
+      padding: 1px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .badge-stat-aus {
+      color: var(--danger-color);
+      font-weight: 700;
+    }
+
+    .badge-stat-tar {
+      color: var(--warning-color);
+      font-weight: 700;
+    }
+
     .student-details {
       font-size: 0.76rem;
       color: var(--text-muted);
@@ -1055,11 +1100,33 @@
           nombre: r.n,
           curso: r.c,
           taller: r.t || obtenerTallerDeRegistros(docente, curso, turno),
+          ausentes: r.aus || 0,
+          tardanzas: r.tar || 0,
           estado: 'Presente',
           observacion: ''
         }));
 
       renderizarAlumnos(alumnosFiltrados);
+    }
+
+    function renderInasistenciasBadge(aus = 0, tar = 0) {
+      const numAus = Number(aus) || 0;
+      const numTar = Number(tar) || 0;
+
+      if (numAus === 0 && numTar === 0) {
+        return `<span class="attendance-stat-badge stat-clean">(0 aus.)</span>`;
+      }
+
+      const partes = [];
+      if (numAus > 0) {
+        partes.push(`<span class="badge-stat-aus">${numAus} aus.</span>`);
+      }
+      if (numTar > 0) {
+        partes.push(`<span class="badge-stat-tar">${numTar} tard.</span>`);
+      }
+
+      const nivelAlerta = numAus >= 4 ? 'stat-critical' : (numAus >= 2 ? 'stat-warning' : 'stat-normal');
+      return `<span class="attendance-stat-badge ${nivelAlerta}">(${partes.join(' &bull; ')})</span>`;
     }
 
     function verificarDuplicado(fechaFormateada, docente, curso, turno) {
@@ -1119,7 +1186,7 @@
             ${iniciales}
           </div>
           <div class="student-info">
-            <div class="student-name">${al.nombre}</div>
+            <div class="student-name">${al.nombre} ${renderInasistenciasBadge(al.ausentes, al.tardanzas)}</div>
             <div class="student-details">
               <span>${al.curso} &bull; ${al.taller || 'Taller'}</span>
             </div>
@@ -1340,6 +1407,21 @@
             tardanzas: t,
             ausentes: a,
             total: alumnosActuales.length
+          });
+        }
+
+        if (APP_DATA && APP_DATA.registros) {
+          alumnosActuales.forEach(x => {
+            const regOriginal = APP_DATA.registros.find(r => 
+              r.d && r.c && r.n &&
+              normalizarStr(r.d) === normalizarStr(docente) && 
+              normalizarStr(r.c) === normalizarStr(curso) &&
+              normalizarStr(r.n) === normalizarStr(x.nombre)
+            );
+            if (regOriginal) {
+              if (x.estado === 'Ausente') regOriginal.aus = (regOriginal.aus || 0) + 1;
+              else if (x.estado === 'Tardanza') regOriginal.tar = (regOriginal.tar || 0) + 1;
+            }
           });
         }
 
