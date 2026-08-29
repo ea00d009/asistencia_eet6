@@ -941,19 +941,53 @@
       }
     }
 
-    function getDiaSemana(fechaStr) {
-      if (!fechaStr) return "";
-      const partes = fechaStr.split('-');
-      const fecha = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+    function getDiaSemana(fechaInput) {
+      if (!fechaInput) return "";
+      let str = fechaInput.toString().trim();
+      let d = null;
+      
+      const matchIso = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      if (matchIso) {
+        d = new Date(Number(matchIso[1]), Number(matchIso[2]) - 1, Number(matchIso[3]));
+      } else {
+        const matchLat = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
+        if (matchLat) {
+          let y = Number(matchLat[3]);
+          if (y < 100) y += 2000;
+          d = new Date(y, Number(matchLat[2]) - 1, Number(matchLat[1]));
+        }
+      }
+      
+      if (!d || isNaN(d.getTime())) return "";
       const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-      return dias[fecha.getDay()];
+      return dias[d.getDay()];
     }
 
-    function getFechaFormateada(fechaStr) {
-      if (!fechaStr) return "";
-      const partes = fechaStr.split('-');
-      const añoCorto = partes[0].slice(-2);
-      return `${partes[2]}/${partes[1]}/${añoCorto}`;
+    function getFechaFormateada(fechaInput) {
+      if (!fechaInput) return "";
+      
+      let str = fechaInput.toString().trim();
+      if (!str) return "";
+      
+      // Formato ISO: YYYY-MM-DD o YYYY/MM/DD (ej: 2026-08-29)
+      const matchIso = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      if (matchIso) {
+        const año = matchIso[1].slice(-2);
+        const mes = matchIso[2].padStart(2, '0');
+        const dia = matchIso[3].padStart(2, '0');
+        return `${dia}/${mes}/${año}`;
+      }
+      
+      // Formato Latino: DD/MM/YYYY o DD/MM/YY o DD-MM-YYYY (ej: 29/08/2026 o 29/08/26)
+      const matchLat = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
+      if (matchLat) {
+        const dia = matchLat[1].padStart(2, '0');
+        const mes = matchLat[2].padStart(2, '0');
+        const año = matchLat[3].slice(-2);
+        return `${dia}/${mes}/${año}`;
+      }
+      
+      return str;
     }
 
     function normalizarStr(str) {
@@ -1138,8 +1172,10 @@
         return;
       }
 
+      const fechaBuscadaStd = getFechaFormateada(fechaFormateada);
+
       const match = APP_DATA.asistenciasHoy.find(a => 
-        a.fecha === fechaFormateada && 
+        getFechaFormateada(a.fecha) === fechaBuscadaStd && 
         normalizarStr(a.docente) === normalizarStr(docente) && 
         normalizarStr(a.curso) === normalizarStr(curso) &&
         normalizarStr(a.turno) === normalizarStr(turno)

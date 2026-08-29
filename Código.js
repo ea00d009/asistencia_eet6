@@ -104,6 +104,40 @@ function normalizarTextoServidor(str) {
 }
 
 /**
+ * Estandariza cualquier formato de fecha a DD/MM/AA (ej: 29/08/26)
+ */
+function estandarizarFecha(fechaInput) {
+  if (!fechaInput) return "";
+  
+  if (fechaInput instanceof Date) {
+    return Utilities.formatDate(fechaInput, "GMT-3", "dd/MM/yy");
+  }
+  
+  let str = fechaInput.toString().trim();
+  if (!str) return "";
+  
+  // Formato ISO: YYYY-MM-DD o YYYY/MM/DD (ej: 2026-08-29)
+  const matchIso = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (matchIso) {
+    const año = matchIso[1].slice(-2);
+    const mes = matchIso[2].padStart(2, '0');
+    const dia = matchIso[3].padStart(2, '0');
+    return `${dia}/${mes}/${año}`;
+  }
+  
+  // Formato Latino: DD/MM/YYYY o DD/MM/YY o DD-MM-YYYY (ej: 29/08/2026 o 29/08/26)
+  const matchLat = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})/);
+  if (matchLat) {
+    const dia = matchLat[1].padStart(2, '0');
+    const mes = matchLat[2].padStart(2, '0');
+    const año = matchLat[3].slice(-2);
+    return `${dia}/${mes}/${año}`;
+  }
+  
+  return str;
+}
+
+/**
  * Carga todos los datos necesarios en una sola lectura de la planilla.
  */
 function getInitialData() {
@@ -222,12 +256,12 @@ function getAsistenciasPorFecha(fechaConsultada) {
     }
     
     const gruposMap = new Map();
-    const fechaConsultadaNorm = normalizarTextoServidor(fechaConsultada);
+    const fechaConsultadaStd = estandarizarFecha(fechaConsultada);
     
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
-      const fecha = row[0] ? row[0].toString().trim() : "";
-      if (normalizarTextoServidor(fecha) !== fechaConsultadaNorm) continue;
+      const fechaFilaStd = estandarizarFecha(row[0]);
+      if (fechaFilaStd !== fechaConsultadaStd) continue;
       
       const docente = row[1] ? row[1].toString().trim() : "";
       let taller = row[2] ? row[2].toString().trim() : "";
@@ -245,11 +279,11 @@ function getAsistenciasPorFecha(fechaConsultada) {
         }
       }
       
-      const key = `${fecha}|${docente}|${curso}|${turno}`;
+      const key = `${fechaFilaStd}|${docente}|${curso}|${turno}`;
       if (!gruposMap.has(key)) {
         gruposMap.set(key, {
           key: key,
-          fecha: fecha,
+          fecha: fechaFilaStd,
           docente: docente,
           taller: taller,
           curso: curso,
@@ -326,9 +360,11 @@ function guardarAsistencia(registros, docente, fechaElegida, turnoElegido) {
       }
     }
     
+    const fechaNormalizada = estandarizarFecha(fechaElegida) || Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yy");
+    
     // Mapeo masivo: Fecha | Docente | Taller | Curso | Turno | Alumno | Estado | Observaciones
     const filasParaGuardar = registros.map(reg => [
-      fechaElegida,
+      fechaNormalizada,
       docente,
       reg.taller ? reg.taller.toString().trim() : (tallerDefecto || ""),
       reg.curso || "",
