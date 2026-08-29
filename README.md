@@ -1,91 +1,113 @@
 # 📱 Sistema de Asistencia de Talleres - E.E.T. N° 6
 
-Aplicación web desarrollada sobre **Google Apps Script** y **HTML5 / JavaScript** para la toma y registro ágil de asistencia de los talleres técnicos de la Escuela de Educación Técnica N° 6.
+Aplicación web moderna, ágil y de alto rendimiento desarrollada para la toma y registro de asistencia técnica en los talleres de la **Escuela de Educación Técnica N° 6**. 
+
+Funciona de forma híbrida: se puede acceder directamente desde **GitHub Pages** (como aplicación web / PWA independiente) o embebida dentro de **Google Apps Script**, comunicándose de forma segura y en tiempo real con **Google Sheets**.
 
 ---
 
 ## 🚀 Características Principales
 
-- **⚡ Alto Rendimiento y Respuesta Inmediata (0 ms)**: Toda la información de docentes, cursos y alumnos se procesa en memoria en el cliente, eliminando tiempos de espera al cambiar de fecha, turno o curso.
-- **🧠 Persistencia del Docente**: La aplicación recuerda el último docente seleccionado en el dispositivo (`localStorage`) para agilizar la carga diaria.
-- **🚫 Detección de Asistencia Duplicada**: Alerta visual instantánea si ya se registró asistencia para ese mismo curso, turno y fecha hoy.
-- **📝 Observaciones y Notas por Alumno**: Botón para registrar novedades técnicas (ej: *Sin calzado de seguridad*, *Sin ropa de grafa*, *Retiro anticipado*, *Certificado médico*).
-- **📋 Modal de Confirmación**: Resumen previo detallado antes de guardar la asistencia para evitar errores involuntarios.
-- **👀 Consulta e Historial del Día**: Pestaña / Modal para consultar en tiempo real qué asistencias ya se cargaron en la escuela durante la jornada.
-- **👤 Avatares con Iniciales**: Círculos identificadores de color para cada alumno con sus iniciales.
-- **📳 Feedback Háptico**: Vibración táctil sutil en dispositivos móviles al interactuar con los botones de asistencia.
-- **🌙 Modo Oscuro / Claro**: Selector de tema con detección automática de preferencia del sistema y persistencia en el navegador.
-- **📱 PWA & Mobile First**: Diseño optimizado e instalable en la pantalla de inicio de celulares y tablets.
-- **💾 Guardado Masivo por Lotes**: Inserción en bloque (`setValues`), registrando la asistencia de todo el curso en menos de 1 segundo.
-- **📅 Formato Estandarizado de Fechas**: Registro histórico en formato `DD/MM/AA` con separador de bloques para auditoría.
+### ⚡ Rendimiento & Experiencia de Usuario (UX)
+- **Carga Instantánea en Memoria (0 ms)**: Toda la nómina de estudiantes, talleres y rotaciones se descarga al inicio, permitiendo cambiar de curso, fecha o turno sin tiempos de espera.
+- **📱 Enfoque Mobile-First & PWA**: Diseñado específicamente para celulares y tablets de los docentes en el entorno de taller, con botones táctiles amplios y accesibles.
+- **📳 Feedback Háptico**: Vibración táctil sutil en dispositivos móviles al marcar asistencia, agregar notas o guardar.
+- **🌙 Modo Oscuro / Claro**: Detección automática de la preferencia del sistema operativo y selector manual con persistencia en el navegador (`localStorage`).
+- **🧠 Recordatorio del Docente**: Guarda el último docente seleccionado en el dispositivo para no tener que elegirlo en cada apertura.
+
+### 📋 Gestión y Control de Asistencia
+- **📅 Filtrado Inteligente por Horarios Oficiales**: Al elegir la fecha y turno, el sistema cruza la grilla horaria del docente y muestra únicamente los cursos que le corresponden ese día de la semana.
+- **🔘 Marcado Rápido (Presente / Tardanza / Ausente)**: Interfaz intuitiva con tres estados (P / T / A) y contadores en tiempo real con animación interactiva.
+- **🚫 Detección de Asistencia Duplicada**: Alerta visual automática si ya se registró asistencia para ese curso, docente, turno y fecha hoy, informando cuántos presentes, tardanzas y ausentes se habían guardado.
+- **📝 Observaciones Técnicas con Chips Rápidos**: Botón de observaciones por alumno con atajos de un solo toque:
+  - 🥾 *Sin Calzado Seguridad*
+  - 👕 *Sin Ropa de Grafa*
+  - 🏃 *Retiro Anticipado*
+  - 📄 *Certificado Médico*
+  - ✍️ *Texto libre personalizado*
+- **🔍 Recuperación Automática del Nombre del Taller**: Muestra e integra el nombre del taller específico (ej: *Ajuste, Electricidad, Herrería, Mecanizado, etc.*) en el selector, el modal de confirmación y el historial.
+- **📋 Modal de Confirmación Previo**: Resumen detallado con desglose de presentes, ausencias y lista de observaciones antes de enviar los datos para evitar errores involuntarios.
+- **👀 Historial y Consulta en Tiempo Real**: Modal para consultar qué asistencias ya fueron cargadas durante el día en la escuela, con botón para recargar directamente desde la planilla.
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Arquitectura y Tecnologías
 
-- **Google Apps Script**: Backend serverless conectado directamente con Google Sheets.
-- **HTML5 & Vanilla JavaScript**: Lógica de filtrado, renderizado dinámico, almacenamiento local y vibración háptica.
-- **CSS3 & Bootstrap 5.3**: Estructura de diseño responsivo y variables CSS para el sistema de temas claro/oscuro.
-- **Google Clasp**: Gestión de código fuente, versionado y despliegues desde el entorno local.
-
----
-
-## 📁 Estructura del Proyecto
-
-```text
-asistencia_eet6/
-├── .clasp.json          # Configuración del proyecto en Google Apps Script
-├── appsscript.json      # Manifiesto y permisos de Apps Script
-├── Código.js            # Lógica del servidor (lectura, horarios, historial y guardado masivo)
-├── index.html           # Interfaz de usuario, temas, contadores, modales y notas
-├── .gitignore           # Archivos ignorados para control de versiones
-└── README.md            # Documentación del proyecto
-```
+- **Frontend**: HTML5 Semántico, CSS3 Vanilla con variables y temas personalizados, Bootstrap 5.3, Bootstrap Icons.
+- **Backend / API**: Google Apps Script (Endpoints `doGet` y `doPost` en formato JSON).
+- **Base de Datos**: Google Sheets (lectura por lotes e inserción masiva en bloque con `setValues`).
+- **Despliegue y Hosting**:
+  - **GitHub Pages**: Cliente web estático accesible desde cualquier navegador.
+  - **Google Clasp**: Sincronización y versionado continuo del código hacia Google Apps Script.
 
 ---
 
 ## 📊 Estructura de Google Sheets
 
-La aplicación interactúa con un libro de Google Sheets que contiene dos pestañas:
+La aplicación se alimenta y registra en un libro de Google Sheets compuesto por dos pestañas:
 
-1. **`Rotaciones_T3`**:
-   - **Columna A**: ID Alumno
-   - **Columna B**: Nombre y Apellido
-   - **Columna C**: Curso (ej: `5° 2°`)
-   - **Columna D**: Taller
-   - **Columna E**: Docente
-   - **Columna F**: Turno (`Mañana` / `Tarde`)
+### 1. `Rotaciones_T3` (Nómina y Distribución)
+Contiene la base de datos de los alumnos y su asignación a docentes y talleres:
+| Columna | Campo | Descripción |
+|---|---|---|
+| **A** | `ID Alumno` | Identificador único del alumno |
+| **B** | `Nombre` | Apellido y Nombre del estudiante |
+| **C** | `Curso` | División técnica (ej: `2° 2°`, `5° 1°`) |
+| **D** | `Taller` | Nombre del taller / rotación (ej: `Ajuste`, `Herrería`) |
+| **E** | `Docente` | Nombre completo del docente a cargo |
+| **F** | `Turno` | Turno correspondiente (`Mañana` / `Tarde`) |
 
-2. **`Asistencia_Historica`**:
-   - **Columnas**: `Fecha` | `Docente` | `Taller` | `Curso` | `Turno` | `Alumno` | `Estado` | `Observaciones`
+### 2. `Asistencia_Historica` (Libro de Asistencias)
+Registro secuencial e histórico de cada alumno evaluado:
+| Columna | Campo | Descripción |
+|---|---|---|
+| **A** | `Fecha` | Fecha en formato estandarizado `DD/MM/AA` |
+| **B** | `Docente` | Docente que tomó la asistencia |
+| **C** | `Taller` | Taller correspondiente |
+| **D** | `Curso` | Curso y división |
+| **E** | `Turno` | Turno (`Mañana` / `Tarde`) |
+| **F** | `Alumno` | Apellido y Nombre del estudiante |
+| **G** | `Estado` | `Presente`, `Tardanza` o `Ausente` |
+| **H** | `Observaciones` | Observación técnica o médica (opcional) |
 
 ---
 
-## 💻 Desarrollo y Despliegue con Clasp
+## 📁 Estructura del Repositorio
 
-### 1. Clonar el repositorio
+```text
+asistencia_eet6/
+├── .clasp.json          # Identificador del script en Google Apps Script
+├── appsscript.json      # Configuración de manifiesto y permisos de ejecución
+├── Código.js            # Backend: lectura de rotaciones, historial, API JSON y guardado
+├── index.html           # Frontend: interfaz interactiva, temas, modales y lógica de toma
+├── .gitignore           # Archivos ignorados por Git
+└── README.md            # Documentación general del sistema
+```
+
+---
+
+## 💻 Flujo de Desarrollo y Despliegues
+
+### 1. Clonar el repositorio localmente
 ```bash
 git clone https://github.com/ea00d009/asistencia_eet6.git
 cd asistencia_eet6
 ```
 
-### 2. Iniciar sesión en Google Clasp
+### 2. Sincronizar cambios con Google Apps Script
 ```bash
-clasp login
+npx @google/clasp push
 ```
 
-### 3. Subir cambios al servidor de Google
+### 3. Publicar cambios en GitHub / GitHub Pages
 ```bash
-clasp push
-```
-
-### 4. Desplegar una nueva versión pública
-```bash
-clasp deploy -d "Descripción de los cambios"
+git add .
+git commit -m "Descripción de las mejoras"
+git push origin main
 ```
 
 ---
 
 ## 📄 Licencia
 
-Desarrollado para la **E.E.T. N° 6**. Todos los derechos reservados.
+Desarrollado exclusivamente para la **E.E.T. N° 6**. Todos los derechos reservados.
