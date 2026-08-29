@@ -912,6 +912,39 @@
       return `${partes[2]}/${partes[1]}/${añoCorto}`;
     }
 
+    function normalizarStr(str) {
+      if (!str) return "";
+      return str.toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+    }
+
+    function obtenerTallerDeRegistros(docente, curso, turno) {
+      if (!APP_DATA || !APP_DATA.registros) return "";
+      const docNorm = normalizarStr(docente);
+      const curNorm = normalizarStr(curso);
+      const turNorm = turno ? normalizarStr(turno) : "";
+
+      if (turNorm) {
+        const regConTurno = APP_DATA.registros.find(r => 
+          r.d && r.c &&
+          normalizarStr(r.d) === docNorm &&
+          normalizarStr(r.c) === curNorm &&
+          r.u && normalizarStr(r.u) === turNorm
+        );
+        if (regConTurno && regConTurno.t) return regConTurno.t.trim();
+      }
+
+      const regSinTurno = APP_DATA.registros.find(r => 
+        r.d && r.c &&
+        normalizarStr(r.d) === docNorm &&
+        normalizarStr(r.c) === curNorm
+      );
+      return (regSinTurno && regSinTurno.t) ? regSinTurno.t.trim() : "";
+    }
+
     function onFiltrosChange() {
       const docente = document.getElementById('selectDocente').value;
       if (docente) {
