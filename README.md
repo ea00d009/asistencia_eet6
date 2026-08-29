@@ -9,7 +9,7 @@ Aplicación web desarrollada sobre **Google Apps Script** y **HTML5 / JavaScript
 - **⚡ Alto Rendimiento y Respuesta Inmediata (0 ms)**: Toda la información de docentes, cursos y alumnos se procesa en memoria en el cliente, eliminando tiempos de espera al cambiar de fecha, turno o curso.
 - **🧠 Persistencia del Docente**: La aplicación recuerda el último docente seleccionado en el dispositivo (`localStorage`) para agilizar la carga diaria.
 - **🚫 Detección de Asistencia Duplicada**: Alerta visual instantánea si ya se registró asistencia para ese mismo curso, turno y fecha hoy.
-- **📝 Observaciones y Notas por Alumno**: Botón para registrar novedades técnicas (ej: *Sin calzado de seguridad*, *Sin EPP*, *Retiro anticipado*, *Certificado médico*).
+- **📝 Observaciones y Notas por Alumno**: Botón para registrar novedades técnicas (ej: *Sin calzado de seguridad*, *Sin ropa de grafa*, *Retiro anticipado*, *Certificado médico*).
 - **📋 Modal de Confirmación**: Resumen previo detallado antes de guardar la asistencia para evitar errores involuntarios.
 - **👀 Consulta e Historial del Día**: Pestaña / Modal para consultar en tiempo real qué asistencias ya se cargaron en la escuela durante la jornada.
 - **👤 Avatares con Iniciales**: Círculos identificadores de color para cada alumno con sus iniciales.
