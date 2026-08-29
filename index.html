@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Asistencia Talleres - EET N° 6</title>
+  <!-- Google Fonts & Bootstrap 5.3 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <style>
+    :root {
+      --primary-color: #0f4c81;
+      --primary-hover: #0b3860;
+      --primary-accent: #3b82f6;
+      --bg-surface: #f4f6f9;
+      --card-bg: #ffffff;
+      --card-border: rgba(226, 232, 240, 0.9);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --input-bg: #ffffff;
+      --input-border: #cbd5e1;
+      --input-text: #1e293b;
+      --student-card-bg: #ffffff;
+      --student-card-border: #edf2f7;
+      --student-name: #0f172a;
+      --pill-bg: #ffffff;
+      --pill-border: #e2e8f0;
+      
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --border-radius: 14px;
+    }
+
+    [data-theme="dark"] {
+      --primary-color: #38bdf8;
+      --primary-hover: #0ea5e9;
+      --primary-accent: #0284c7;
+      --bg-surface: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #0f172a;
+      --input-border: #475569;
+      --input-text: #f8fafc;
+      --student-card-bg: #1e293b;
+      --student-card-border: #334155;
+      --student-name: #f8fafc;
+      --pill-bg: #1e293b;
+      --pill-border: #334155;
+    }
+
+    * {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
+      transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    }
+
+    body {
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+      padding: 16px 12px 60px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container {
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* Encabezado con Switch de Tema */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .app-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 76, 129, 0.12);
+      color: var(--primary-color);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    [data-theme="dark"] .app-badge {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+    }
+
+    .app-title {
+      font-weight: 800;
+      color: var(--primary-color);
+      font-size: 1.45rem;
+      margin: 0;
+    }
+
+    /* Botón Modo Oscuro */
+    .theme-toggle-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-panel {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 18px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+      margin-bottom: 16px;
+      border: 1px solid var(--card-border);
+    }
+
+    .form-label-custom {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-control, .form-select {
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border-radius: 10px;
+      border: 1.5px solid var(--input-border);
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    /* Resumen de Asistencia (Stats) */
+    .stats-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-pill {
+      flex: 1;
+      background: var(--pill-bg);
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align: center;
+      border: 1px solid var(--pill-border);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .stat-pill.p-stat { border-left: 4px solid var(--success-color); }
+    .stat-pill.t-stat { border-left: 4px solid var(--warning-color); }
+    .stat-pill.a-stat { border-left: 4px solid var(--danger-color); }
+
+    .stat-num {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Lista y Tarjetas de Alumnos */
+    .student-card {
+      background: var(--student-card-bg);
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border: 1px solid var(--student-card-border);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .student-info {
+      flex: 1;
+      padding-right: 10px;
+    }
+
+    .student-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--student-name);
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+
+    .student-details {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .botones-asistencia {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-asistencia {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-asistencia.presente {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+    }
+    .btn-asistencia.presente.seleccionado {
+      background-color: var(--success-color);
+      color: white;
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35);
+      transform: scale(1.08);
+    }
+
+    .btn-asistencia.tardanza {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+    }
+    .btn-asistencia.tardanza.seleccionado {
+      background-color: var(--warning-color);
+      color: white;
+      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.35);
+      transform: scale(1.08);
+    }
+
+    .btn-asistencia.ausente {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+    .btn-asistencia.ausente.seleccionado {
+      background-color: var(--danger-color);
+      color: white;
+      box-shadow: 0 3px 10px rgba(239, 68, 68, 0.35);
+      transform: scale(1.08);
+    }
+
+    .btn-asistencia.no-seleccionado {
+      opacity: 0.45;
+      transform: scale(0.92);
+    }
+
+    /* Botón Guardar */
+    .btn-submit {
+      background: #0f4c81;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      box-shadow: 0 4px 15px rgba(15, 76, 129, 0.3);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    [data-theme="dark"] .btn-submit {
+      background: #0284c7;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    /* Notificación Flotante Toast */
+    .toast-container-custom {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      width: 90%;
+      max-width: 420px;
+    }
+
+    .toast-custom {
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: white;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast-success { background: #059669; }
+    .toast-error { background: #dc2626; }
+
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .loading-pulse {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Encabezado con Switch de Modo Oscuro -->
+    <header class="app-header">
+      <div>
+        <div class="app-badge">
+          <i class="bi bi-gear-wide-connected"></i> Taller Técnico
+        </div>
+        <h1 class="app-title">E.E.T. N° 6 - Asistencia</h1>
+      </div>
+      <button id="btnThemeToggle" class="theme-toggle-btn" onclick="toggleTheme()" title="Cambiar Tema" aria-label="Cambiar tema">
+        <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+      </button>
+    </header>
+
+    <!-- Panel de Selección Inicial -->
+    <div class="card-panel">
+      <div class="row g-2 mb-3">
+        <div class="col-7">
+          <label class="form-label-custom" for="inputFecha">
+            <i class="bi bi-calendar3"></i> Fecha:
+          </label>
+          <input type="date" id="inputFecha" class="form-control" onchange="onFiltrosChange()">
+        </div>
+        <div class="col-5">
+          <label class="form-label-custom" for="selectTurno">
+            <i class="bi bi-sun"></i> Turno:
+          </label>
+          <select id="selectTurno" class="form-select" onchange="onFiltrosChange()">
+            <option value="Mañana">Mañana</option>
+            <option value="Tarde">Tarde</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label-custom" for="selectDocente">
+          <i class="bi bi-person-badge"></i> Docente:
+        </label>
+        <select id="selectDocente" class="form-select" onchange="onDocenteChange()">
+          <option value="">Cargando docentes...</option>
+        </select>
+      </div>
+
+      <div id="divCurso" style="display: none;">
+        <label class="form-label-custom" for="selectCurso">
+          <i class="bi bi-mortarboard"></i> Curso y Taller:
+        </label>
+        <select id="selectCurso" class="form-select" onchange="onCursoChange()">
+          <option value="">Seleccionar curso...</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Panel de Asistencia de Alumnos -->
+    <div id="panelAlumnos" style="display: none;">
+      <!-- Barra de Estadísticas -->
+      <div class="stats-bar">
+        <div class="stat-pill p-stat">
+          <div class="stat-num text-success" id="countPresentes">0</div>
+          <div class="stat-label">Presentes</div>
+        </div>
+        <div class="stat-pill t-stat">
+          <div class="stat-num text-warning" id="countTardanzas">0</div>
+          <div class="stat-label">Tardanzas</div>
+        </div>
+        <div class="stat-pill a-stat">
+          <div class="stat-num text-danger" id="countAusentes">0</div>
+          <div class="stat-label">Ausentes</div>
+        </div>
+      </div>
+
+      <!-- Lista de Alumnos Dinámica -->
+      <div id="listaAlumnos"></div>
+
+      <!-- Botón de Guardado -->
+      <button id="btnGuardar" class="btn-submit w-100 mt-3" onclick="enviarAsistencia()">
+        <i class="bi bi-cloud-arrow-up-fill"></i>
+        <span>Guardar Asistencia</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Toast de Notificaciones -->
+  <div class="toast-container-custom" id="toastContainer" style="display: none;">
+    <div class="toast-custom" id="toastBox">
+      <i id="toastIcon" class="bi bi-check-circle-fill fs-5"></i>
+      <span id="toastMessage">Operación realizada con éxito</span>
+    </div>
+  </div>
+
+  <script>
+    // Gestión del Tema Oscuro / Claro
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme_eet6') || 
+        (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      setTheme(savedTheme);
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(nextTheme);
+    }
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme_eet6', theme);
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        icon.className = theme === 'dark' ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill';
+      }
+    }
+
+    // Inicializar tema antes del contenido para evitar parpadeo
+    initTheme();
+
+    // Inyección inicial directa desde Apps Script Template (0ms de latencia)
+    let APP_DATA = null;
+    try {
+      APP_DATA = <?!= JSON.stringify(initialData) ?>;
+    } catch (e) {
+      APP_DATA = null;
+    }
+
+    let alumnosActuales = [];
+
+    // Inicialización al cargar la ventana
+    window.addEventListener('DOMContentLoaded', () => {
+      // Configurar fecha de hoy
+      document.getElementById('inputFecha').valueAsDate = new Date();
+
+      if (APP_DATA && APP_DATA.docentes && APP_DATA.docentes.length > 0) {
+        inicializarInterfaz(APP_DATA);
+      } else {
+        cargarDatosServidor();
+      }
+    });
+
+    function cargarDatosServidor() {
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        mostrarToast("Modo de desarrollo sin conexión a Google Apps Script.", "error");
+        return;
+      }
+      google.script.run
+        .withSuccessHandler(data => {
+          APP_DATA = data;
+          inicializarInterfaz(data);
+        })
+        .withFailureHandler(err => {
+          mostrarToast("Error al cargar datos: " + err.message, "error");
+          document.getElementById('selectDocente').innerHTML = '<option value="">Error de carga</option>';
+        })
+        .getInitialData();
+    }
+
+    function inicializarInterfaz(data) {
+      const selectDocente = document.getElementById('selectDocente');
+      selectDocente.innerHTML = '<option value="">Seleccioná tu nombre...</option>';
+      
+      data.docentes.forEach(docente => {
+        const opt = document.createElement('option');
+        opt.value = docente;
+        opt.textContent = docente;
+        selectDocente.appendChild(opt);
+      });
+    }
+
+    // Obtiene el día de la semana en español según la fecha seleccionada
+    function getDiaSemana(fechaStr) {
+      if (!fechaStr) return "";
+      const partes = fechaStr.split('-');
+      const fecha = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+      const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      return dias[fecha.getDay()];
+    }
+
+    // Filtrado 100% en el cliente (0 ms de espera)
+    function onFiltrosChange() {
+      const docente = document.getElementById('selectDocente').value;
+      if (docente) {
+        actualizarCursosCliente();
+      }
+    }
+
+    function onDocenteChange() {
+      const docente = document.getElementById('selectDocente').value;
+      const divCurso = document.getElementById('divCurso');
+      const panelAlumnos = document.getElementById('panelAlumnos');
+
+      if (!docente) {
+        divCurso.style.display = 'none';
+        panelAlumnos.style.display = 'none';
+        return;
+      }
+
+      actualizarCursosCliente();
+    }
+
+    function actualizarCursosCliente() {
+      if (!APP_DATA || !APP_DATA.registros) return;
+
+      const docenteBuscado = document.getElementById('selectDocente').value.trim();
+      const turnoBuscado = document.getElementById('selectTurno').value.trim().toLowerCase();
+      const fechaStr = document.getElementById('inputFecha').value;
+      const diaSemana = getDiaSemana(fechaStr);
+
+      const divCurso = document.getElementById('divCurso');
+      const selectCurso = document.getElementById('selectCurso');
+      const panelAlumnos = document.getElementById('panelAlumnos');
+
+      panelAlumnos.style.display = 'none';
+      divCurso.style.display = 'block';
+      selectCurso.innerHTML = '';
+
+      const HORARIOS = APP_DATA.horarios || {};
+      const cursosMap = new Map();
+
+      APP_DATA.registros.forEach(row => {
+        if (row.d === docenteBuscado && row.u === turnoBuscado) {
+          let cursoHabilitado = true;
+
+          if (HORARIOS[docenteBuscado] && diaSemana) {
+            const cursosDelDia = HORARIOS[docenteBuscado][diaSemana] || [];
+            if (!cursosDelDia.includes(row.c)) {
+              cursoHabilitado = false;
+            }
+          }
+
+          if (cursoHabilitado && row.c) {
+            cursosMap.set(row.c, row.t);
+          }
+        }
+      });
+
+      const cursosLista = Array.from(cursosMap.entries())
+        .map(([curso, taller]) => ({ curso, taller }))
+        .sort((a, b) => a.curso.localeCompare(b.curso));
+
+      if (cursosLista.length === 0) {
+        selectCurso.disabled = true;
+        selectCurso.innerHTML = `<option value="">Sin cursos el ${diaSemana} a la ${document.getElementById('selectTurno').value}</option>`;
+        return;
+      }
+
+      selectCurso.disabled = false;
+      selectCurso.innerHTML = '<option value="">Elegí el curso...</option>';
+      cursosLista.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.curso;
+        opt.textContent = `${item.curso} - ${item.taller}`;
+        selectCurso.appendChild(opt);
+      });
+    }
+
+    // Carga de alumnos instantánea desde la memoria local
+    function onCursoChange() {
+      const docente = document.getElementById('selectDocente').value.trim();
+      const curso = document.getElementById('selectCurso').value.trim();
+      const panelAlumnos = document.getElementById('panelAlumnos');
+
+      if (!curso || !docente) {
+        panelAlumnos.style.display = 'none';
+        return;
+      }
+
+      const alumnosFiltrados = APP_DATA.registros
+        .filter(r => r.d === docente && r.c === curso)
+        .map(r => ({
+          id: r.id,
+          nombre: r.n,
+          curso: r.c,
+          taller: r.t,
+          estado: 'Presente'
+        }));
+
+      renderizarAlumnos(alumnosFiltrados);
+    }
+
+    function renderizarAlumnos(alumnos) {
+      alumnosActuales = alumnos;
+      const contenedor = document.getElementById('listaAlumnos');
+      const panelAlumnos = document.getElementById('panelAlumnos');
+
+      contenedor.innerHTML = '';
+      panelAlumnos.style.display = 'block';
+
+      if (alumnos.length === 0) {
+        contenedor.innerHTML = `
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
+            No se encontraron alumnos para este grupo.
+          </div>
+        `;
+        document.getElementById('btnGuardar').style.display = 'none';
+        actualizarContadores();
+        return;
+      }
+
+      document.getElementById('btnGuardar').style.display = 'flex';
+
+      alumnos.forEach((al, index) => {
+        const card = document.createElement('div');
+        card.className = 'student-card';
+        card.innerHTML = `
+          <div class="student-info">
+            <div class="student-name">${al.nombre}</div>
+            <div class="student-details">${al.curso} &bull; ${al.taller}</div>
+          </div>
+          <div class="botones-asistencia">
+            <button type="button" id="btnP_${index}" class="btn-asistencia presente seleccionado" onclick="marcar(${index}, 'Presente')">P</button>
+            <button type="button" id="btnT_${index}" class="btn-asistencia tardanza no-seleccionado" onclick="marcar(${index}, 'Tardanza')">T</button>
+            <button type="button" id="btnA_${index}" class="btn-asistencia ausente no-seleccionado" onclick="marcar(${index}, 'Ausente')">A</button>
+          </div>
+        `;
+        contenedor.appendChild(card);
+      });
+
+      actualizarContadores();
+    }
+
+    function marcar(index, estado) {
+      alumnosActuales[index].estado = estado;
+      actualizarBotonesAlumno(index, estado);
+      actualizarContadores();
+    }
+
+    function actualizarBotonesAlumno(index, estado) {
+      const mapa = { 'Presente': 'P', 'Tardanza': 'T', 'Ausente': 'A' };
+      const letraSeleccionada = mapa[estado];
+
+      ['P', 'T', 'A'].forEach(letra => {
+        const btn = document.getElementById(`btn${letra}_${index}`);
+        if (letra === letraSeleccionada) {
+          btn.classList.add('seleccionado');
+          btn.classList.remove('no-seleccionado');
+        } else {
+          btn.classList.add('no-seleccionado');
+          btn.classList.remove('seleccionado');
+        }
+      });
+    }
+
+    function actualizarContadores() {
+      let pres = 0, tard = 0, ause = 0;
+      alumnosActuales.forEach(a => {
+        if (a.estado === 'Presente') pres++;
+        else if (a.estado === 'Tardanza') tard++;
+        else if (a.estado === 'Ausente') ause++;
+      });
+
+      document.getElementById('countPresentes').textContent = pres;
+      document.getElementById('countTardanzas').textContent = tard;
+      document.getElementById('countAusentes').textContent = ause;
+    }
+
+    function enviarAsistencia() {
+      const docente = document.getElementById('selectDocente').value;
+      const fechaOriginal = document.getElementById('inputFecha').value;
+      const turno = document.getElementById('selectTurno').value;
+      const btn = document.getElementById('btnGuardar');
+
+      if (!fechaOriginal) {
+        mostrarToast("Por favor, seleccioná una fecha válida.", "error");
+        return;
+      }
+
+      if (alumnosActuales.length === 0) {
+        mostrarToast("No hay alumnos para guardar.", "error");
+        return;
+      }
+
+      // Acá desarmamos la fecha original (YYYY-MM-DD) y la armamos exactamente como DD/MM/AA
+      const partes = fechaOriginal.split('-');
+      const añoCorto = partes[0].slice(-2); // Saca los últimos 2 números del año (ej: 26)
+      const fechaFormateada = `${partes[2]}/${partes[1]}/${añoCorto}`;
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="loading-pulse"></span><span>Guardando asistencia...</span>`;
+
+      google.script.run
+        .withSuccessHandler(res => {
+          mostrarToast(res, "success");
+          btn.disabled = false;
+          btn.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
+
+          // Resetear vista para la siguiente carga
+          document.getElementById('selectCurso').value = '';
+          document.getElementById('panelAlumnos').style.display = 'none';
+        })
+        .withFailureHandler(err => {
+          mostrarToast("Error al guardar: " + err.message, "error");
+          btn.disabled = false;
+          btn.innerHTML = `<i class="bi bi-arrow-repeat"></i><span>Reintentar Guardado</span>`;
+        })
+        .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno);
+    }
+
+    let toastTimer = null;
+    function mostrarToast(mensaje, tipo = "success") {
+      const container = document.getElementById('toastContainer');
+      const box = document.getElementById('toastBox');
+      const msg = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+
+      msg.textContent = mensaje;
+      box.className = `toast-custom ${tipo === 'success' ? 'toast-success' : 'toast-error'}`;
+      icon.className = `bi ${tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} fs-5`;
+
+      container.style.display = 'block';
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        container.style.display = 'none';
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

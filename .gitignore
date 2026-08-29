@@ -1,0 +1,13 @@
+# Credenciales y variables de entorno
+.clasprc.json
+.env
+*.log
+
+# Dependencias
+node_modules/
+
+# Archivos de sistema operativo e IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
