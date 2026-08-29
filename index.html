@@ -4,7 +4,12 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Asistencia EET6">
+  <meta name="theme-color" content="#0f4c81" id="metaThemeColor">
   <title>Asistencia Talleres - EET N° 6</title>
+  
   <!-- Google Fonts & Bootstrap 5.3 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,6 +36,11 @@
       --student-name: #0f172a;
       --pill-bg: #ffffff;
       --pill-border: #e2e8f0;
+      --modal-bg: #ffffff;
+      --modal-border: #e2e8f0;
+      --badge-note-bg: #fef3c7;
+      --badge-note-text: #92400e;
+      --badge-note-border: #fde68a;
       
       --success-color: #10b981;
       --warning-color: #f59e0b;
@@ -55,12 +65,17 @@
       --student-name: #f8fafc;
       --pill-bg: #1e293b;
       --pill-border: #334155;
+      --modal-bg: #1e293b;
+      --modal-border: #334155;
+      --badge-note-bg: rgba(245, 158, 11, 0.2);
+      --badge-note-text: #fbbf24;
+      --badge-note-border: rgba(245, 158, 11, 0.35);
     }
 
     * {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       box-sizing: border-box;
-      transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     }
 
     body {
@@ -76,12 +91,12 @@
       margin: 0 auto;
     }
 
-    /* Encabezado con Switch de Tema */
+    /* Encabezado con Botones de Acción */
     .app-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .app-badge {
@@ -111,8 +126,12 @@
       margin: 0;
     }
 
-    /* Botón Modo Oscuro */
-    .theme-toggle-btn {
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-action-btn {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       color: var(--text-main);
@@ -122,13 +141,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       transition: all 0.2s ease;
     }
 
-    .theme-toggle-btn:hover {
+    .header-action-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
@@ -169,6 +188,27 @@
       box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
     }
 
+    /* Alerta de Duplicado */
+    .duplicate-banner {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1.5px solid var(--warning-color);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      animation: fadeIn 0.25s ease;
+    }
+
+    .duplicate-banner i {
+      font-size: 1.25rem;
+      color: var(--warning-color);
+      flex-shrink: 0;
+    }
+
     /* Resumen de Asistencia (Stats) */
     .stats-bar {
       display: flex;
@@ -194,6 +234,12 @@
       font-size: 1.25rem;
       font-weight: 800;
       line-height: 1.1;
+      display: inline-block;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .stat-num.pop {
+      transform: scale(1.3);
     }
 
     .stat-label {
@@ -203,7 +249,7 @@
       text-transform: uppercase;
     }
 
-    /* Lista y Tarjetas de Alumnos */
+    /* Tarjetas de Alumnos con Avatar */
     .student-card {
       background: var(--student-card-bg);
       padding: 12px 14px;
@@ -214,30 +260,87 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
+    }
+
+    .student-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 800;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
     }
 
     .student-info {
       flex: 1;
-      padding-right: 10px;
+      min-width: 0;
     }
 
     .student-name {
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.93rem;
       color: var(--student-name);
       line-height: 1.25;
       margin-bottom: 2px;
+      word-break: break-word;
     }
 
     .student-details {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* Badge de Observación / Nota */
+    .note-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--badge-note-bg);
+      color: var(--badge-note-text);
+      border: 1px solid var(--badge-note-border);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 3px;
+    }
+
+    .btn-add-note {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 600;
+      padding: 2px 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      opacity: 0.8;
+    }
+
+    .btn-add-note:hover {
+      color: var(--primary-color);
+      opacity: 1;
     }
 
     .botones-asistencia {
       display: flex;
       gap: 6px;
+      flex-shrink: 0;
     }
 
     .btn-asistencia {
@@ -252,6 +355,7 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      touch-action: manipulation;
     }
 
     .btn-asistencia.presente {
@@ -324,13 +428,107 @@
       cursor: not-allowed;
     }
 
-    /* Notificación Flotante Toast */
+    /* Modales Estilizados */
+    .modal-backdrop-custom {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-content-custom {
+      background: var(--modal-bg);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid var(--modal-border);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-header-custom {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--modal-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header-custom h5 {
+      margin: 0;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-body-custom {
+      padding: 20px;
+    }
+
+    .modal-footer-custom {
+      padding: 14px 20px;
+      border-top: 1px solid var(--modal-border);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .chip-tag {
+      display: inline-block;
+      background: rgba(15, 76, 129, 0.08);
+      color: var(--primary-color);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 3px 2px;
+      border: 1px solid rgba(15, 76, 129, 0.15);
+      transition: all 0.15s ease;
+    }
+
+    [data-theme="dark"] .chip-tag {
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.25);
+    }
+
+    .chip-tag:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    /* Historial Cards */
+    .history-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+
+    /* Notificación Toast */
     .toast-container-custom {
       position: fixed;
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 9999;
+      z-index: 20000;
       width: 90%;
       max-width: 420px;
     }
@@ -354,6 +552,14 @@
       from { transform: translateY(30px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleUp {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
 
     .loading-pulse {
       display: inline-block;
@@ -365,15 +571,13 @@
       animation: spin 0.7s linear infinite;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
   <div class="app-container">
     
-    <!-- Encabezado con Switch de Modo Oscuro -->
+    <!-- Encabezado con Botones de Historial y Tema -->
     <header class="app-header">
       <div>
         <div class="app-badge">
@@ -381,9 +585,14 @@
         </div>
         <h1 class="app-title">E.E.T. N° 6 - Asistencia</h1>
       </div>
-      <button id="btnThemeToggle" class="theme-toggle-btn" onclick="toggleTheme()" title="Cambiar Tema" aria-label="Cambiar tema">
-        <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
-      </button>
+      <div class="header-actions">
+        <button id="btnHistory" class="header-action-btn" onclick="abrirModalHistorial()" title="Ver Asistencias de Hoy" aria-label="Ver asistencias">
+          <i class="bi bi-clock-history"></i>
+        </button>
+        <button id="btnThemeToggle" class="header-action-btn" onclick="toggleTheme()" title="Cambiar Tema" aria-label="Cambiar tema">
+          <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+        </button>
+      </div>
     </header>
 
     <!-- Panel de Selección Inicial -->
@@ -425,6 +634,14 @@
       </div>
     </div>
 
+    <!-- Banner de Asistencia Duplicada -->
+    <div id="bannerDuplicado" class="duplicate-banner" style="display: none;">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <div>
+        <strong>Atención:</strong> Ya se registró asistencia para este curso y turno hoy (<span id="txtStatsDuplicado"></span>). Si guardás de nuevo, se agregará otro bloque.
+      </div>
+    </div>
+
     <!-- Panel de Asistencia de Alumnos -->
     <div id="panelAlumnos" style="display: none;">
       <!-- Barra de Estadísticas -->
@@ -447,12 +664,105 @@
       <div id="listaAlumnos"></div>
 
       <!-- Botón de Guardado -->
-      <button id="btnGuardar" class="btn-submit w-100 mt-3" onclick="enviarAsistencia()">
+      <button id="btnGuardar" class="btn-submit w-100 mt-3" onclick="abrirModalConfirmacion()">
         <i class="bi bi-cloud-arrow-up-fill"></i>
         <span>Guardar Asistencia</span>
       </button>
     </div>
 
+  </div>
+
+  <!-- Modal de Observación / Nota por Alumno -->
+  <div id="modalNota" class="modal-backdrop-custom" style="display: none;">
+    <div class="modal-content-custom">
+      <div class="modal-header-custom">
+        <h5><i class="bi bi-pencil-square text-primary"></i> Nota / Observación</h5>
+        <button type="button" class="btn-close" onclick="cerrarModalNota()"></button>
+      </div>
+      <div class="modal-body-custom">
+        <p class="fw-bold mb-1" id="modalNotaAlumnoNombre">Alumno</p>
+        <p class="text-muted small mb-3">Agregá una nota u observación específica (ej. seguridad, certificados o retiros):</p>
+        
+        <div class="mb-3">
+          <span class="chip-tag" onclick="agregarChipNota('🥾 Sin Calzado Seguridad')">🥾 Sin Calzado</span>
+          <span class="chip-tag" onclick="agregarChipNota('🦺 Sin EPP')">🦺 Sin EPP</span>
+          <span class="chip-tag" onclick="agregarChipNota('🏃 Retiro Anticipado')">🏃 Retiro</span>
+          <span class="chip-tag" onclick="agregarChipNota('📄 Certificado Médico')">📄 Certificado</span>
+          <span class="chip-tag" onclick="agregarChipNota('⏰ Llegada Tarde')">⏰ Tarde</span>
+        </div>
+
+        <textarea id="modalNotaInput" class="form-control" rows="3" placeholder="Escribí una observación aquí..."></textarea>
+      </div>
+      <div class="modal-footer-custom">
+        <button class="btn btn-outline-danger btn-sm" onclick="borrarNotaActual()">Borrar Nota</button>
+        <button class="btn btn-primary btn-sm px-4 fw-bold" onclick="guardarNotaActual()">Listo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación Previo a Guardar -->
+  <div id="modalConfirmacion" class="modal-backdrop-custom" style="display: none;">
+    <div class="modal-content-custom">
+      <div class="modal-header-custom">
+        <h5><i class="bi bi-clipboard-check text-primary"></i> Confirmar Asistencia</h5>
+        <button type="button" class="btn-close" onclick="cerrarModalConfirmacion()"></button>
+      </div>
+      <div class="modal-body-custom">
+        <div class="p-3 bg-light rounded-3 mb-3" style="background: var(--bg-surface) !important; border: 1px solid var(--card-border);">
+          <div class="small text-muted">Docente:</div>
+          <div class="fw-bold mb-1" id="confDocente"></div>
+          <div class="small text-muted">Curso y Turno:</div>
+          <div class="fw-bold" id="confCursoTurno"></div>
+        </div>
+
+        <div class="stats-bar mb-3">
+          <div class="stat-pill p-stat">
+            <div class="stat-num text-success" id="confPres">0</div>
+            <div class="stat-label">Presentes</div>
+          </div>
+          <div class="stat-pill t-stat">
+            <div class="stat-num text-warning" id="confTard">0</div>
+            <div class="stat-label">Tardanzas</div>
+          </div>
+          <div class="stat-pill a-stat">
+            <div class="stat-num text-danger" id="confAuse">0</div>
+            <div class="stat-label">Ausentes</div>
+          </div>
+        </div>
+
+        <div id="confListaObservaciones" class="small mb-2"></div>
+      </div>
+      <div class="modal-footer-custom">
+        <button class="btn btn-outline-secondary btn-sm" onclick="cerrarModalConfirmacion()">Revisar</button>
+        <button id="btnConfirmarEnvio" class="btn btn-primary btn-sm px-4 fw-bold" onclick="ejecutarGuardadoAsistencia()">
+          <i class="bi bi-check-circle-fill"></i> Confirmar y Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Historial de Asistencias del Día -->
+  <div id="modalHistorial" class="modal-backdrop-custom" style="display: none;">
+    <div class="modal-content-custom">
+      <div class="modal-header-custom">
+        <h5><i class="bi bi-clock-history text-primary"></i> Asistencias Registradas</h5>
+        <button type="button" class="btn-close" onclick="cerrarModalHistorial()"></button>
+      </div>
+      <div class="modal-body-custom">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted small fw-bold" id="txtFechaHistorial">Hoy</span>
+          <button class="btn btn-outline-primary btn-sm py-1 px-2" onclick="recargarHistorialServidor()">
+            <i class="bi bi-arrow-clockwise"></i> Actualizar
+          </button>
+        </div>
+        <div id="listaHistorialContenido">
+          <p class="text-center text-muted py-3">Cargando registros...</p>
+        </div>
+      </div>
+      <div class="modal-footer-custom">
+        <button class="btn btn-secondary btn-sm" onclick="cerrarModalHistorial()">Cerrar</button>
+      </div>
+    </div>
   </div>
 
   <!-- Toast de Notificaciones -->
@@ -464,6 +774,36 @@
   </div>
 
   <script>
+    // Paleta de colores para avatares de alumnos
+    const AVATAR_COLORS = [
+      '#0284c7', '#059669', '#d97706', '#7c3aed', 
+      '#db2777', '#4f46e5', '#0d9488', '#ea580c'
+    ];
+
+    function getAvatarColor(nombre) {
+      let hash = 0;
+      for (let i = 0; i < nombre.length; i++) {
+        hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+    }
+
+    function getIniciales(nombre) {
+      if (!nombre) return "AL";
+      const parts = nombre.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return nombre.substring(0, 2).toUpperCase();
+    }
+
+    // Feedback Háptico (Vibración en Celulares)
+    function vibrar(ms = 15) {
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate(ms); } catch (e) {}
+      }
+    }
+
     // Gestión del Tema Oscuro / Claro
     function initTheme() {
       const savedTheme = localStorage.getItem('theme_eet6') || 
@@ -472,6 +812,7 @@
     }
 
     function toggleTheme() {
+      vibrar(12);
       const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
       const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
       setTheme(nextTheme);
@@ -481,12 +822,15 @@
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme_eet6', theme);
       const icon = document.getElementById('themeIcon');
+      const meta = document.getElementById('metaThemeColor');
       if (icon) {
         icon.className = theme === 'dark' ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill';
       }
+      if (meta) {
+        meta.setAttribute('content', theme === 'dark' ? '#0f172a' : '#0f4c81');
+      }
     }
 
-    // Inicializar tema antes del contenido para evitar parpadeo
     initTheme();
 
     // Inyección inicial directa desde Apps Script Template (0ms de latencia)
@@ -498,10 +842,10 @@
     }
 
     let alumnosActuales = [];
+    let indiceAlumnoNota = null;
 
-    // Inicialización al cargar la ventana
+    // Inicialización al cargar
     window.addEventListener('DOMContentLoaded', () => {
-      // Configurar fecha de hoy
       document.getElementById('inputFecha').valueAsDate = new Date();
 
       if (APP_DATA && APP_DATA.docentes && APP_DATA.docentes.length > 0) {
@@ -513,7 +857,7 @@
 
     function cargarDatosServidor() {
       if (typeof google === 'undefined' || !google.script || !google.script.run) {
-        mostrarToast("Modo de desarrollo sin conexión a Google Apps Script.", "error");
+        mostrarToast("Modo de desarrollo sin conexión a Apps Script.", "error");
         return;
       }
       google.script.run
@@ -538,9 +882,15 @@
         opt.textContent = docente;
         selectDocente.appendChild(opt);
       });
+
+      // Recuperar último docente seleccionado en este equipo
+      const ultimoDocente = localStorage.getItem('docente_eet6');
+      if (ultimoDocente && data.docentes.includes(ultimoDocente)) {
+        selectDocente.value = ultimoDocente;
+        onDocenteChange();
+      }
     }
 
-    // Obtiene el día de la semana en español según la fecha seleccionada
     function getDiaSemana(fechaStr) {
       if (!fechaStr) return "";
       const partes = fechaStr.split('-');
@@ -549,7 +899,13 @@
       return dias[fecha.getDay()];
     }
 
-    // Filtrado 100% en el cliente (0 ms de espera)
+    function getFechaFormateada(fechaStr) {
+      if (!fechaStr) return "";
+      const partes = fechaStr.split('-');
+      const añoCorto = partes[0].slice(-2);
+      return `${partes[2]}/${partes[1]}/${añoCorto}`;
+    }
+
     function onFiltrosChange() {
       const docente = document.getElementById('selectDocente').value;
       if (docente) {
@@ -565,9 +921,12 @@
       if (!docente) {
         divCurso.style.display = 'none';
         panelAlumnos.style.display = 'none';
+        document.getElementById('bannerDuplicado').style.display = 'none';
         return;
       }
 
+      // Recordar docente en localStorage
+      localStorage.setItem('docente_eet6', docente);
       actualizarCursosCliente();
     }
 
@@ -586,6 +945,7 @@
       panelAlumnos.style.display = 'none';
       divCurso.style.display = 'block';
       selectCurso.innerHTML = '';
+      document.getElementById('bannerDuplicado').style.display = 'none';
 
       const HORARIOS = APP_DATA.horarios || {};
       const cursosMap = new Map();
@@ -627,16 +987,22 @@
       });
     }
 
-    // Carga de alumnos instantánea desde la memoria local
     function onCursoChange() {
       const docente = document.getElementById('selectDocente').value.trim();
       const curso = document.getElementById('selectCurso').value.trim();
+      const turno = document.getElementById('selectTurno').value.trim();
+      const fechaStr = document.getElementById('inputFecha').value;
+      const fechaFormateada = getFechaFormateada(fechaStr);
       const panelAlumnos = document.getElementById('panelAlumnos');
 
       if (!curso || !docente) {
         panelAlumnos.style.display = 'none';
+        document.getElementById('bannerDuplicado').style.display = 'none';
         return;
       }
+
+      // Verificación de duplicados
+      verificarDuplicado(fechaFormateada, docente, curso, turno);
 
       const alumnosFiltrados = APP_DATA.registros
         .filter(r => r.d === docente && r.c === curso)
@@ -645,10 +1011,35 @@
           nombre: r.n,
           curso: r.c,
           taller: r.t,
-          estado: 'Presente'
+          estado: 'Presente',
+          observacion: ''
         }));
 
       renderizarAlumnos(alumnosFiltrados);
+    }
+
+    function verificarDuplicado(fechaFormateada, docente, curso, turno) {
+      const banner = document.getElementById('bannerDuplicado');
+      const stats = document.getElementById('txtStatsDuplicado');
+      
+      if (!APP_DATA || !APP_DATA.asistenciasHoy) {
+        banner.style.display = 'none';
+        return;
+      }
+
+      const match = APP_DATA.asistenciasHoy.find(a => 
+        a.fecha === fechaFormateada && 
+        a.docente.toLowerCase() === docente.toLowerCase() && 
+        a.curso.toLowerCase() === curso.toLowerCase() &&
+        a.turno.toLowerCase() === turno.toLowerCase()
+      );
+
+      if (match) {
+        stats.textContent = `${match.presentes} Pres, ${match.tardanzas} Tard, ${match.ausentes} Aus`;
+        banner.style.display = 'flex';
+      } else {
+        banner.style.display = 'none';
+      }
     }
 
     function renderizarAlumnos(alumnos) {
@@ -676,10 +1067,21 @@
       alumnos.forEach((al, index) => {
         const card = document.createElement('div');
         card.className = 'student-card';
+        const color = getAvatarColor(al.nombre);
+        const iniciales = getIniciales(al.nombre);
+
         card.innerHTML = `
+          <div class="student-avatar" style="background-color: ${color};">
+            ${iniciales}
+          </div>
           <div class="student-info">
             <div class="student-name">${al.nombre}</div>
-            <div class="student-details">${al.curso} &bull; ${al.taller}</div>
+            <div class="student-details">
+              <span>${al.curso} &bull; ${al.taller}</span>
+            </div>
+            <div id="obsContainer_${index}">
+              ${renderObsBadge(al.observacion, index)}
+            </div>
           </div>
           <div class="botones-asistencia">
             <button type="button" id="btnP_${index}" class="btn-asistencia presente seleccionado" onclick="marcar(${index}, 'Presente')">P</button>
@@ -693,7 +1095,15 @@
       actualizarContadores();
     }
 
+    function renderObsBadge(obs, index) {
+      if (obs && obs.trim()) {
+        return `<span class="note-badge" onclick="abrirModalNota(${index})"><i class="bi bi-tag-fill"></i> ${obs}</span>`;
+      }
+      return `<button type="button" class="btn-add-note" onclick="abrirModalNota(${index})"><i class="bi bi-plus-circle"></i> Nota</button>`;
+    }
+
     function marcar(index, estado) {
+      vibrar(15);
       alumnosActuales[index].estado = estado;
       actualizarBotonesAlumno(index, estado);
       actualizarContadores();
@@ -715,6 +1125,14 @@
       });
     }
 
+    function animarNumero(el, nuevoValor) {
+      if (el.textContent !== String(nuevoValor)) {
+        el.textContent = nuevoValor;
+        el.classList.add('pop');
+        setTimeout(() => el.classList.remove('pop'), 180);
+      }
+    }
+
     function actualizarContadores() {
       let pres = 0, tard = 0, ause = 0;
       alumnosActuales.forEach(a => {
@@ -723,44 +1141,144 @@
         else if (a.estado === 'Ausente') ause++;
       });
 
-      document.getElementById('countPresentes').textContent = pres;
-      document.getElementById('countTardanzas').textContent = tard;
-      document.getElementById('countAusentes').textContent = ause;
+      animarNumero(document.getElementById('countPresentes'), pres);
+      animarNumero(document.getElementById('countTardanzas'), tard);
+      animarNumero(document.getElementById('countAusentes'), ause);
     }
 
-    function enviarAsistencia() {
+    // Modal de Notas / Observaciones
+    function abrirModalNota(index) {
+      indiceAlumnoNota = index;
+      const alumno = alumnosActuales[index];
+      document.getElementById('modalNotaAlumnoNombre').textContent = `${alumno.nombre} (${alumno.curso})`;
+      document.getElementById('modalNotaInput').value = alumno.observacion || '';
+      document.getElementById('modalNota').style.display = 'flex';
+      vibrar(10);
+    }
+
+    function cerrarModalNota() {
+      document.getElementById('modalNota').style.display = 'none';
+      indiceAlumnoNota = null;
+    }
+
+    function agregarChipNota(texto) {
+      vibrar(10);
+      const input = document.getElementById('modalNotaInput');
+      input.value = input.value ? `${input.value}, ${texto}` : texto;
+    }
+
+    function guardarNotaActual() {
+      if (indiceAlumnoNota !== null) {
+        const val = document.getElementById('modalNotaInput').value.trim();
+        alumnosActuales[indiceAlumnoNota].observacion = val;
+        document.getElementById(`obsContainer_${indiceAlumnoNota}`).innerHTML = renderObsBadge(val, indiceAlumnoNota);
+      }
+      cerrarModalNota();
+    }
+
+    function borrarNotaActual() {
+      if (indiceAlumnoNota !== null) {
+        alumnosActuales[indiceAlumnoNota].observacion = '';
+        document.getElementById(`obsContainer_${indiceAlumnoNota}`).innerHTML = renderObsBadge('', indiceAlumnoNota);
+      }
+      cerrarModalNota();
+    }
+
+    // Modal de Confirmación Previo a Guardar
+    function abrirModalConfirmacion() {
+      const docente = document.getElementById('selectDocente').value;
+      const curso = document.getElementById('selectCurso').value;
+      const turno = document.getElementById('selectTurno').value;
+      const fechaStr = document.getElementById('inputFecha').value;
+      const fechaFormateada = getFechaFormateada(fechaStr);
+
+      if (!fechaStr || !docente || !curso || alumnosActuales.length === 0) {
+        mostrarToast("Faltan datos para guardar la asistencia.", "error");
+        return;
+      }
+
+      vibrar(20);
+      document.getElementById('confDocente').textContent = docente;
+      document.getElementById('confCursoTurno').textContent = `${curso} &bull; Turno ${turno} (${fechaFormateada})`;
+
+      let pres = 0, tard = 0, ause = 0;
+      const listaObs = [];
+
+      alumnosActuales.forEach(al => {
+        if (al.estado === 'Presente') pres++;
+        else if (al.estado === 'Tardanza') {
+          tard++;
+          listaObs.push(`<strong>${al.nombre}:</strong> Tardanza ${al.observacion ? '(' + al.observacion + ')' : ''}`);
+        } else if (al.estado === 'Ausente') {
+          ause++;
+          listaObs.push(`<strong>${al.nombre}:</strong> <span class="text-danger">Ausente</span> ${al.observacion ? '(' + al.observacion + ')' : ''}`);
+        } else if (al.observacion) {
+          listaObs.push(`<strong>${al.nombre}:</strong> ${al.observacion}`);
+        }
+      });
+
+      document.getElementById('confPres').textContent = pres;
+      document.getElementById('confTard').textContent = tard;
+      document.getElementById('confAuse').textContent = ause;
+
+      const contObs = document.getElementById('confListaObservaciones');
+      if (listaObs.length > 0) {
+        contObs.innerHTML = `<div class="fw-bold mb-1 text-muted">Detalles y Novedades:</div>` + 
+          listaObs.map(item => `<div class="mb-1 text-secondary">&bull; ${item}</div>`).join('');
+      } else {
+        contObs.innerHTML = `<div class="text-success fw-bold"><i class="bi bi-check-all"></i> Todo el grupo completo y presente.</div>`;
+      }
+
+      document.getElementById('modalConfirmacion').style.display = 'flex';
+    }
+
+    function cerrarModalConfirmacion() {
+      document.getElementById('modalConfirmacion').style.display = 'none';
+    }
+
+    function ejecutarGuardadoAsistencia() {
+      cerrarModalConfirmacion();
       const docente = document.getElementById('selectDocente').value;
       const fechaOriginal = document.getElementById('inputFecha').value;
       const turno = document.getElementById('selectTurno').value;
+      const curso = document.getElementById('selectCurso').value;
       const btn = document.getElementById('btnGuardar');
-
-      if (!fechaOriginal) {
-        mostrarToast("Por favor, seleccioná una fecha válida.", "error");
-        return;
-      }
-
-      if (alumnosActuales.length === 0) {
-        mostrarToast("No hay alumnos para guardar.", "error");
-        return;
-      }
-
-      // Acá desarmamos la fecha original (YYYY-MM-DD) y la armamos exactamente como DD/MM/AA
-      const partes = fechaOriginal.split('-');
-      const añoCorto = partes[0].slice(-2); // Saca los últimos 2 números del año (ej: 26)
-      const fechaFormateada = `${partes[2]}/${partes[1]}/${añoCorto}`;
+      const fechaFormateada = getFechaFormateada(fechaOriginal);
 
       btn.disabled = true;
       btn.innerHTML = `<span class="loading-pulse"></span><span>Guardando asistencia...</span>`;
 
       google.script.run
         .withSuccessHandler(res => {
+          vibrar(40);
           mostrarToast(res, "success");
           btn.disabled = false;
           btn.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
 
-          // Resetear vista para la siguiente carga
+          // Registrar en memoria local para detección de duplicados en caliente
+          if (APP_DATA && APP_DATA.asistenciasHoy) {
+            let p = 0, t = 0, a = 0;
+            alumnosActuales.forEach(x => {
+              if (x.estado === 'Presente') p++;
+              else if (x.estado === 'Tardanza') t++;
+              else if (x.estado === 'Ausente') a++;
+            });
+            APP_DATA.asistenciasHoy.unshift({
+              fecha: fechaFormateada,
+              docente: docente,
+              curso: curso,
+              turno: turno,
+              presentes: p,
+              tardanzas: t,
+              ausentes: a,
+              total: alumnosActuales.length
+            });
+          }
+
+          // Resetear vista
           document.getElementById('selectCurso').value = '';
           document.getElementById('panelAlumnos').style.display = 'none';
+          document.getElementById('bannerDuplicado').style.display = 'none';
         })
         .withFailureHandler(err => {
           mostrarToast("Error al guardar: " + err.message, "error");
@@ -768,6 +1286,72 @@
           btn.innerHTML = `<i class="bi bi-arrow-repeat"></i><span>Reintentar Guardado</span>`;
         })
         .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno);
+    }
+
+    // Modal de Historial de Asistencias del Día
+    function abrirModalHistorial() {
+      vibrar(10);
+      const fechaOriginal = document.getElementById('inputFecha').value;
+      const fechaFormateada = getFechaFormateada(fechaOriginal);
+      document.getElementById('txtFechaHistorial').textContent = `Fecha: ${fechaFormateada}`;
+      document.getElementById('modalHistorial').style.display = 'flex';
+      renderizarListaHistorial(APP_DATA ? APP_DATA.asistenciasHoy : []);
+    }
+
+    function cerrarModalHistorial() {
+      document.getElementById('modalHistorial').style.display = 'none';
+    }
+
+    function recargarHistorialServidor() {
+      const fechaOriginal = document.getElementById('inputFecha').value;
+      const fechaFormateada = getFechaFormateada(fechaOriginal);
+      const cont = document.getElementById('listaHistorialContenido');
+      cont.innerHTML = '<p class="text-center text-muted py-3"><span class="loading-pulse"></span> Buscando en la planilla...</p>';
+
+      if (typeof google === 'undefined' || !google.script || !google.script.run) {
+        cont.innerHTML = '<p class="text-center text-muted py-3">Modo de desarrollo sin conexión.</p>';
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(data => {
+          if (APP_DATA) APP_DATA.asistenciasHoy = data;
+          renderizarListaHistorial(data);
+        })
+        .withFailureHandler(err => {
+          cont.innerHTML = `<p class="text-center text-danger py-3">Error al consultar: ${err.message}</p>`;
+        })
+        .getAsistenciasPorFecha(fechaFormateada);
+    }
+
+    function renderizarListaHistorial(lista) {
+      const cont = document.getElementById('listaHistorialContenido');
+      if (!lista || lista.length === 0) {
+        cont.innerHTML = `
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+            No se han registrado asistencias para esta fecha todavía.
+          </div>
+        `;
+        return;
+      }
+
+      cont.innerHTML = lista.map((g, idx) => `
+        <div class="history-card">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <div>
+              <div class="fw-bold fs-6">${g.curso} &bull; ${g.taller || 'Taller'}</div>
+              <div class="text-muted small"><i class="bi bi-person-fill"></i> ${g.docente} (${g.turno})</div>
+            </div>
+            <span class="badge bg-primary text-white">${g.total} alumnos</span>
+          </div>
+          <div class="d-flex gap-2 mt-2 pt-2 border-top">
+            <span class="small text-success fw-bold"><i class="bi bi-check-circle-fill"></i> ${g.presentes} Pres</span>
+            <span class="small text-warning fw-bold"><i class="bi bi-exclamation-circle-fill"></i> ${g.tardanzas} Tard</span>
+            <span class="small text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> ${g.ausentes} Aus</span>
+          </div>
+        </div>
+      `).join('');
     }
 
     let toastTimer = null;
