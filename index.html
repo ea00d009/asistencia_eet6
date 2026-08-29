@@ -672,11 +672,11 @@
 
   </div>
 
-  <!-- Modal de Observación / Nota por Alumno -->
+  <!-- Modal de Observación por Alumno -->
   <div id="modalNota" class="modal-backdrop-custom" style="display: none;">
     <div class="modal-content-custom">
       <div class="modal-header-custom">
-        <h5><i class="bi bi-pencil-square text-primary"></i> Nota / Observación</h5>
+        <h5><i class="bi bi-pencil-square text-primary"></i> Observaciones</h5>
         <button type="button" class="btn-close" onclick="cerrarModalNota()"></button>
       </div>
       <div class="modal-body-custom">
@@ -694,7 +694,7 @@
         <textarea id="modalNotaInput" class="form-control" rows="3" placeholder="Escribí una observación aquí..."></textarea>
       </div>
       <div class="modal-footer-custom">
-        <button class="btn btn-outline-danger btn-sm" onclick="borrarNotaActual()">Borrar Nota</button>
+        <button class="btn btn-outline-danger btn-sm" onclick="borrarNotaActual()">Borrar Observación</button>
         <button class="btn btn-primary btn-sm px-4 fw-bold" onclick="guardarNotaActual()">Listo</button>
       </div>
     </div>
@@ -1144,7 +1144,7 @@
       if (obs && obs.trim()) {
         return `<span class="note-badge" onclick="abrirModalNota(${index})"><i class="bi bi-tag-fill"></i> ${obs}</span>`;
       }
-      return `<button type="button" class="btn-add-note" onclick="abrirModalNota(${index})"><i class="bi bi-plus-circle"></i> Nota</button>`;
+      return `<button type="button" class="btn-add-note" onclick="abrirModalNota(${index})"><i class="bi bi-plus-circle"></i> Observaciones</button>`;
     }
 
     function marcar(index, estado) {
