@@ -188,6 +188,10 @@
       box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
     }
 
+    #inputFecha {
+      cursor: pointer;
+    }
+
     /* Alerta de Duplicado */
     .duplicate-banner {
       background: rgba(245, 158, 11, 0.12);
@@ -644,10 +648,10 @@
     <div class="card-panel">
       <div class="row g-2 mb-3">
         <div class="col-7">
-          <label class="form-label-custom" for="inputFecha">
+          <label class="form-label-custom" for="inputFecha" onclick="abrirCalendario()" style="cursor: pointer;">
             <i class="bi bi-calendar3"></i> Fecha:
           </label>
-          <input type="date" id="inputFecha" class="form-control" onchange="onFiltrosChange()">
+          <input type="date" id="inputFecha" class="form-control" onchange="onFiltrosChange()" onclick="abrirCalendario()">
         </div>
         <div class="col-5">
           <label class="form-label-custom" for="selectTurno">
@@ -938,6 +942,21 @@
       if (ultimoDocente && data.docentes.includes(ultimoDocente)) {
         selectDocente.value = ultimoDocente;
         onDocenteChange();
+      }
+    }
+
+    function abrirCalendario() {
+      const input = document.getElementById('inputFecha');
+      if (input) {
+        if (typeof input.showPicker === 'function') {
+          try {
+            input.showPicker();
+          } catch (e) {
+            input.focus();
+          }
+        } else {
+          input.focus();
+        }
       }
     }
 
