@@ -59,7 +59,7 @@ La aplicación interactúa con un libro de Google Sheets que contiene dos pesta�
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/<usuario>/<repositorio>.git
+git clone https://github.com/ea00d009/asistencia_eet6.git
 cd asistencia_eet6
 ```
 
