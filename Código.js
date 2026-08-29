@@ -1,15 +1,75 @@
-function doGet() {
+function doGet(e) {
+  // Manejo de peticiones de API JSON desde GitHub Pages u otros clientes
+  if (e && e.parameter && e.parameter.action) {
+    const action = e.parameter.action;
+    
+    if (action === 'getInitialData') {
+      try {
+        const data = getInitialData();
+        return ContentService.createTextOutput(JSON.stringify({ success: true, data: data }))
+                             .setMimeType(ContentService.MimeType.JSON);
+      } catch (err) {
+        return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
+                             .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+    
+    if (action === 'getHistorial') {
+      try {
+        const fecha = e.parameter.fecha || "";
+        const data = getAsistenciasPorFecha(fecha);
+        return ContentService.createTextOutput(JSON.stringify({ success: true, data: data }))
+                             .setMimeType(ContentService.MimeType.JSON);
+      } catch (err) {
+        return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.message }))
+                             .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+  }
+
+  // Renderizado HTML directo si se accede por Apps Script
   const template = HtmlService.createTemplateFromFile('index');
   try {
     template.initialData = getInitialData();
-  } catch (e) {
-    template.initialData = { error: e.message, docentes: [], registros: [], horarios: HORARIOS, asistenciasHoy: [] };
+  } catch (err) {
+    template.initialData = { error: err.message, docentes: [], registros: [], horarios: HORARIOS, asistenciasHoy: [] };
   }
   
   return template.evaluate()
       .setTitle('Asistencia Talleres - EET N° 6')
       .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+/**
+ * Endpoint POST para guardar la asistencia desde GitHub Pages o Apps Script
+ */
+function doPost(e) {
+  try {
+    let payload = null;
+    if (e && e.postData && e.postData.contents) {
+      payload = JSON.parse(e.postData.contents);
+    } else if (e && e.parameter) {
+      payload = e.parameter;
+    }
+    
+    if (!payload) {
+      throw new Error("No se recibieron datos para procesar.");
+    }
+    
+    const res = guardarAsistencia(
+      payload.registros,
+      payload.docente,
+      payload.fechaElegida,
+      payload.turnoElegido
+    );
+    
+    return ContentService.createTextOutput(JSON.stringify({ success: true, message: res }))
+                         .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message }))
+                         .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 // Diccionario oficial de horarios cargado según la grilla oficial
@@ -33,7 +93,6 @@ const HORARIOS = {
 
 /**
  * Carga todos los datos necesarios en una sola lectura de la planilla.
- * Incluye la lista de docentes, rotaciones, horarios y las asistencias ya guardadas hoy.
  */
 function getInitialData() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -45,7 +104,6 @@ function getInitialData() {
     return { docentes: [], registros: [], horarios: HORARIOS, asistenciasHoy: [] };
   }
   
-  // Lectura en bloque de Rotaciones_T3: Col 1 a 6 (ID, Nombre, Curso, Taller, Docente, Turno)
   const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
   const docentesSet = new Set();
   const registros = [];
@@ -73,7 +131,6 @@ function getInitialData() {
     }
   }
   
-  // Obtenemos la fecha de hoy en formato DD/MM/AA (GMT-3)
   const hoyStr = Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yy");
   const asistenciasHoy = getAsistenciasPorFecha(hoyStr);
   
@@ -98,10 +155,8 @@ function getAsistenciasPorFecha(fechaConsultada) {
     const lastRow = sheet.getLastRow();
     if (lastRow < 2) return [];
     
-    // Leemos las filas recientes (hasta 600)
     const numRows = Math.min(lastRow - 1, 600);
     const startRow = lastRow - numRows + 1;
-    // Columnas: Fecha | Docente | Taller | Curso | Turno | Alumno | Estado | Observaciones
     const data = sheet.getRange(startRow, 1, numRows, 8).getValues();
     
     const gruposMap = new Map();
@@ -157,7 +212,6 @@ function getAsistenciasPorFecha(fechaConsultada) {
 
 /**
  * Guarda el lote completo de asistencia en un único llamado a la API de Sheets.
- * Soporta la columna de Observaciones (8 columnas en total).
  */
 function guardarAsistencia(registros, docente, fechaElegida, turnoElegido) {
   try {
@@ -183,10 +237,8 @@ function guardarAsistencia(registros, docente, fechaElegida, turnoElegido) {
       reg.observacion || ""
     ]);
     
-    // Inserción en bloque masivo (8 columnas)
     sheet.getRange(filaInicio, 1, filasParaGuardar.length, 8).setValues(filasParaGuardar);
     
-    // Borde superior divisorio grueso en la primera fila del bloque
     sheet.getRange(filaInicio, 1, 1, 8)
          .setBorder(true, false, false, false, false, false, "black", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
          

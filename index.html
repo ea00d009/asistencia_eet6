@@ -774,6 +774,9 @@
   </div>
 
   <script>
+    // URL del Endpoint Backend en Google Apps Script
+    const API_URL = "https://script.google.com/macros/s/AKfycbz9THL1kUmENVb3yP0mvCdJolO5D1AZrL09lu7ae1D3RN2jkYsHq3gw2TmTsmZVq2J5/exec";
+
     // Paleta de colores para avatares de alumnos
     const AVATAR_COLORS = [
       '#0284c7', '#059669', '#d97706', '#7c3aed', 
@@ -833,43 +836,46 @@
 
     initTheme();
 
-    // Inyección inicial directa desde Apps Script Template (0ms de latencia)
     let APP_DATA = null;
-    try {
-      APP_DATA = <?!= JSON.stringify(initialData) ?>;
-    } catch (e) {
-      APP_DATA = null;
-    }
-
     let alumnosActuales = [];
     let indiceAlumnoNota = null;
 
-    // Inicialización al cargar
+    // Inicialización al cargar la ventana
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('inputFecha').valueAsDate = new Date();
-
-      if (APP_DATA && APP_DATA.docentes && APP_DATA.docentes.length > 0) {
-        inicializarInterfaz(APP_DATA);
-      } else {
-        cargarDatosServidor();
-      }
+      cargarDatosServidor();
     });
 
-    function cargarDatosServidor() {
-      if (typeof google === 'undefined' || !google.script || !google.script.run) {
-        mostrarToast("Modo de desarrollo sin conexión a Apps Script.", "error");
+    async function cargarDatosServidor() {
+      // 1. Si está corriendo dentro del iframe de Apps Script
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(data => {
+            APP_DATA = data;
+            inicializarInterfaz(data);
+          })
+          .withFailureHandler(err => {
+            mostrarToast("Error al cargar datos: " + err.message, "error");
+            document.getElementById('selectDocente').innerHTML = '<option value="">Error de carga</option>';
+          })
+          .getInitialData();
         return;
       }
-      google.script.run
-        .withSuccessHandler(data => {
-          APP_DATA = data;
-          inicializarInterfaz(data);
-        })
-        .withFailureHandler(err => {
-          mostrarToast("Error al cargar datos: " + err.message, "error");
-          document.getElementById('selectDocente').innerHTML = '<option value="">Error de carga</option>';
-        })
-        .getInitialData();
+
+      // 2. Si está corriendo en GitHub Pages / Web Externa (API Fetch)
+      try {
+        const resp = await fetch(API_URL + "?action=getInitialData");
+        const json = await resp.json();
+        if (json.success && json.data) {
+          APP_DATA = json.data;
+          inicializarInterfaz(json.data);
+        } else {
+          throw new Error(json.error || "No se pudieron obtener los datos.");
+        }
+      } catch (err) {
+        mostrarToast("Error al conectar con la planilla: " + err.message, "error");
+        document.getElementById('selectDocente').innerHTML = '<option value="">Error de carga</option>';
+      }
     }
 
     function inicializarInterfaz(data) {
@@ -925,7 +931,6 @@
         return;
       }
 
-      // Recordar docente en localStorage
       localStorage.setItem('docente_eet6', docente);
       actualizarCursosCliente();
     }
@@ -1001,7 +1006,6 @@
         return;
       }
 
-      // Verificación de duplicados
       verificarDuplicado(fechaFormateada, docente, curso, turno);
 
       const alumnosFiltrados = APP_DATA.registros
@@ -1146,7 +1150,6 @@
       animarNumero(document.getElementById('countAusentes'), ause);
     }
 
-    // Modal de Notas / Observaciones
     function abrirModalNota(index) {
       indiceAlumnoNota = index;
       const alumno = alumnosActuales[index];
@@ -1184,7 +1187,6 @@
       cerrarModalNota();
     }
 
-    // Modal de Confirmación Previo a Guardar
     function abrirModalConfirmacion() {
       const docente = document.getElementById('selectDocente').value;
       const curso = document.getElementById('selectCurso').value;
@@ -1236,7 +1238,7 @@
       document.getElementById('modalConfirmacion').style.display = 'none';
     }
 
-    function ejecutarGuardadoAsistencia() {
+    async function ejecutarGuardadoAsistencia() {
       cerrarModalConfirmacion();
       const docente = document.getElementById('selectDocente').value;
       const fechaOriginal = document.getElementById('inputFecha').value;
@@ -1248,47 +1250,75 @@
       btn.disabled = true;
       btn.innerHTML = `<span class="loading-pulse"></span><span>Guardando asistencia...</span>`;
 
-      google.script.run
-        .withSuccessHandler(res => {
-          vibrar(40);
-          mostrarToast(res, "success");
-          btn.disabled = false;
-          btn.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
+      const payload = {
+        registros: alumnosActuales,
+        docente: docente,
+        fechaElegida: fechaFormateada,
+        turnoElegido: turno
+      };
 
-          // Registrar en memoria local para detección de duplicados en caliente
-          if (APP_DATA && APP_DATA.asistenciasHoy) {
-            let p = 0, t = 0, a = 0;
-            alumnosActuales.forEach(x => {
-              if (x.estado === 'Presente') p++;
-              else if (x.estado === 'Tardanza') t++;
-              else if (x.estado === 'Ausente') a++;
-            });
-            APP_DATA.asistenciasHoy.unshift({
-              fecha: fechaFormateada,
-              docente: docente,
-              curso: curso,
-              turno: turno,
-              presentes: p,
-              tardanzas: t,
-              ausentes: a,
-              total: alumnosActuales.length
-            });
-          }
+      const onExito = (msg) => {
+        vibrar(40);
+        mostrarToast(msg || "✅ Asistencia registrada correctamente.", "success");
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
 
-          // Resetear vista
-          document.getElementById('selectCurso').value = '';
-          document.getElementById('panelAlumnos').style.display = 'none';
-          document.getElementById('bannerDuplicado').style.display = 'none';
-        })
-        .withFailureHandler(err => {
-          mostrarToast("Error al guardar: " + err.message, "error");
-          btn.disabled = false;
-          btn.innerHTML = `<i class="bi bi-arrow-repeat"></i><span>Reintentar Guardado</span>`;
-        })
-        .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno);
+        if (APP_DATA && APP_DATA.asistenciasHoy) {
+          let p = 0, t = 0, a = 0;
+          alumnosActuales.forEach(x => {
+            if (x.estado === 'Presente') p++;
+            else if (x.estado === 'Tardanza') t++;
+            else if (x.estado === 'Ausente') a++;
+          });
+          APP_DATA.asistenciasHoy.unshift({
+            fecha: fechaFormateada,
+            docente: docente,
+            curso: curso,
+            turno: turno,
+            presentes: p,
+            tardanzas: t,
+            ausentes: a,
+            total: alumnosActuales.length
+          });
+        }
+
+        document.getElementById('selectCurso').value = '';
+        document.getElementById('panelAlumnos').style.display = 'none';
+        document.getElementById('bannerDuplicado').style.display = 'none';
+      };
+
+      const onError = (errMsg) => {
+        mostrarToast("Error al guardar: " + errMsg, "error");
+        btn.disabled = false;
+        btn.innerHTML = `<i class="bi bi-arrow-repeat"></i><span>Reintentar Guardado</span>`;
+      };
+
+      // Si se ejecuta en Apps Script
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(onExito)
+          .withFailureHandler(err => onError(err.message))
+          .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno);
+        return;
+      }
+
+      // Si se ejecuta en GitHub Pages
+      try {
+        const resp = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const json = await resp.json();
+        if (json.success) {
+          onExito(json.message);
+        } else {
+          throw new Error(json.error || "Error al guardar la asistencia.");
+        }
+      } catch (err) {
+        onError(err.message);
+      }
     }
 
-    // Modal de Historial de Asistencias del Día
     function abrirModalHistorial() {
       vibrar(10);
       const fechaOriginal = document.getElementById('inputFecha').value;
@@ -1302,26 +1332,37 @@
       document.getElementById('modalHistorial').style.display = 'none';
     }
 
-    function recargarHistorialServidor() {
+    async function recargarHistorialServidor() {
       const fechaOriginal = document.getElementById('inputFecha').value;
       const fechaFormateada = getFechaFormateada(fechaOriginal);
       const cont = document.getElementById('listaHistorialContenido');
       cont.innerHTML = '<p class="text-center text-muted py-3"><span class="loading-pulse"></span> Buscando en la planilla...</p>';
 
-      if (typeof google === 'undefined' || !google.script || !google.script.run) {
-        cont.innerHTML = '<p class="text-center text-muted py-3">Modo de desarrollo sin conexión.</p>';
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(data => {
+            if (APP_DATA) APP_DATA.asistenciasHoy = data;
+            renderizarListaHistorial(data);
+          })
+          .withFailureHandler(err => {
+            cont.innerHTML = `<p class="text-center text-danger py-3">Error al consultar: ${err.message}</p>`;
+          })
+          .getAsistenciasPorFecha(fechaFormateada);
         return;
       }
 
-      google.script.run
-        .withSuccessHandler(data => {
-          if (APP_DATA) APP_DATA.asistenciasHoy = data;
-          renderizarListaHistorial(data);
-        })
-        .withFailureHandler(err => {
-          cont.innerHTML = `<p class="text-center text-danger py-3">Error al consultar: ${err.message}</p>`;
-        })
-        .getAsistenciasPorFecha(fechaFormateada);
+      try {
+        const resp = await fetch(`${API_URL}?action=getHistorial&fecha=${encodeURIComponent(fechaFormateada)}`);
+        const json = await resp.json();
+        if (json.success && json.data) {
+          if (APP_DATA) APP_DATA.asistenciasHoy = json.data;
+          renderizarListaHistorial(json.data);
+        } else {
+          throw new Error(json.error || "Error al consultar historial.");
+        }
+      } catch (err) {
+        cont.innerHTML = `<p class="text-center text-danger py-3">Error al consultar: ${err.message}</p>`;
+      }
     }
 
     function renderizarListaHistorial(lista) {
@@ -1336,7 +1377,7 @@
         return;
       }
 
-      cont.innerHTML = lista.map((g, idx) => `
+      cont.innerHTML = lista.map((g) => `
         <div class="history-card">
           <div class="d-flex justify-content-between align-items-start mb-1">
             <div>
