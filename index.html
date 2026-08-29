@@ -955,19 +955,23 @@
       const HORARIOS = APP_DATA.horarios || {};
       const cursosMap = new Map();
 
+      const docenteHorarioKey = Object.keys(HORARIOS).find(k => normalizarStr(k) === normalizarStr(docenteBuscado));
+      const cursosPermitidosHoy = (docenteHorarioKey && HORARIOS[docenteHorarioKey] && diaSemana && HORARIOS[docenteHorarioKey][diaSemana])
+        ? HORARIOS[docenteHorarioKey][diaSemana]
+        : null;
+
       APP_DATA.registros.forEach(row => {
-        if (row.d === docenteBuscado && row.u === turnoBuscado) {
+        if (normalizarStr(row.d) === normalizarStr(docenteBuscado) && normalizarStr(row.u) === normalizarStr(turnoBuscado)) {
           let cursoHabilitado = true;
 
-          if (HORARIOS[docenteBuscado] && diaSemana) {
-            const cursosDelDia = HORARIOS[docenteBuscado][diaSemana] || [];
-            if (!cursosDelDia.includes(row.c)) {
+          if (cursosPermitidosHoy) {
+            if (!cursosPermitidosHoy.some(c => normalizarStr(c) === normalizarStr(row.c))) {
               cursoHabilitado = false;
             }
           }
 
           if (cursoHabilitado && row.c) {
-            cursosMap.set(row.c, row.t);
+            cursosMap.set(row.c, row.t || "");
           }
         }
       });
@@ -987,7 +991,7 @@
       cursosLista.forEach(item => {
         const opt = document.createElement('option');
         opt.value = item.curso;
-        opt.textContent = `${item.curso} - ${item.taller}`;
+        opt.textContent = item.taller ? `${item.curso} - ${item.taller}` : item.curso;
         selectCurso.appendChild(opt);
       });
     }
@@ -1009,12 +1013,16 @@
       verificarDuplicado(fechaFormateada, docente, curso, turno);
 
       const alumnosFiltrados = APP_DATA.registros
-        .filter(r => r.d === docente && r.c === curso)
+        .filter(r => 
+          normalizarStr(r.d) === normalizarStr(docente) && 
+          normalizarStr(r.c) === normalizarStr(curso) &&
+          (!turno || !r.u || normalizarStr(r.u) === normalizarStr(turno))
+        )
         .map(r => ({
           id: r.id,
           nombre: r.n,
           curso: r.c,
-          taller: r.t,
+          taller: r.t || obtenerTallerDeRegistros(docente, curso, turno),
           estado: 'Presente',
           observacion: ''
         }));
@@ -1033,9 +1041,9 @@
 
       const match = APP_DATA.asistenciasHoy.find(a => 
         a.fecha === fechaFormateada && 
-        a.docente.toLowerCase() === docente.toLowerCase() && 
-        a.curso.toLowerCase() === curso.toLowerCase() &&
-        a.turno.toLowerCase() === turno.toLowerCase()
+        normalizarStr(a.docente) === normalizarStr(docente) && 
+        normalizarStr(a.curso) === normalizarStr(curso) &&
+        normalizarStr(a.turno) === normalizarStr(turno)
       );
 
       if (match) {
@@ -1081,7 +1089,7 @@
           <div class="student-info">
             <div class="student-name">${al.nombre}</div>
             <div class="student-details">
-              <span>${al.curso} &bull; ${al.taller}</span>
+              <span>${al.curso} &bull; ${al.taller || 'Taller'}</span>
             </div>
             <div id="obsContainer_${index}">
               ${renderObsBadge(al.observacion, index)}
@@ -1119,18 +1127,20 @@
 
       ['P', 'T', 'A'].forEach(letra => {
         const btn = document.getElementById(`btn${letra}_${index}`);
-        if (letra === letraSeleccionada) {
-          btn.classList.add('seleccionado');
-          btn.classList.remove('no-seleccionado');
-        } else {
-          btn.classList.add('no-seleccionado');
-          btn.classList.remove('seleccionado');
+        if (btn) {
+          if (letra === letraSeleccionada) {
+            btn.classList.add('seleccionado');
+            btn.classList.remove('no-seleccionado');
+          } else {
+            btn.classList.add('no-seleccionado');
+            btn.classList.remove('seleccionado');
+          }
         }
       });
     }
 
     function animarNumero(el, nuevoValor) {
-      if (el.textContent !== String(nuevoValor)) {
+      if (el && el.textContent !== String(nuevoValor)) {
         el.textContent = nuevoValor;
         el.classList.add('pop');
         setTimeout(() => el.classList.remove('pop'), 180);
@@ -1139,6 +1149,7 @@
 
     function actualizarContadores() {
       let pres = 0, tard = 0, ause = 0;
+
       alumnosActuales.forEach(a => {
         if (a.estado === 'Presente') pres++;
         else if (a.estado === 'Tardanza') tard++;
@@ -1151,12 +1162,13 @@
     }
 
     function abrirModalNota(index) {
+      vibrar(10);
       indiceAlumnoNota = index;
       const alumno = alumnosActuales[index];
-      document.getElementById('modalNotaAlumnoNombre').textContent = `${alumno.nombre} (${alumno.curso})`;
+      document.getElementById('modalNotaAlumnoNombre').textContent = alumno.nombre;
       document.getElementById('modalNotaInput').value = alumno.observacion || '';
       document.getElementById('modalNota').style.display = 'flex';
-      vibrar(10);
+      setTimeout(() => document.getElementById('modalNotaInput').focus(), 50);
     }
 
     function cerrarModalNota() {
@@ -1164,10 +1176,14 @@
       indiceAlumnoNota = null;
     }
 
-    function agregarChipNota(texto) {
-      vibrar(10);
+    function insertarTextoRapido(texto) {
+      vibrar(8);
       const input = document.getElementById('modalNotaInput');
       input.value = input.value ? `${input.value}, ${texto}` : texto;
+    }
+
+    function agregarChipNota(texto) {
+      insertarTextoRapido(texto);
     }
 
     function guardarNotaActual() {
@@ -1201,21 +1217,28 @@
 
       vibrar(20);
       document.getElementById('confDocente').textContent = docente;
-      document.getElementById('confCursoTurno').textContent = `${curso} &bull; Turno ${turno} (${fechaFormateada})`;
+      
+      const tallerNombre = (alumnosActuales.length > 0 && alumnosActuales[0].taller)
+        ? alumnosActuales[0].taller
+        : obtenerTallerDeRegistros(docente, curso, turno);
+      const cursoConTaller = tallerNombre ? `${curso} - ${tallerNombre}` : curso;
+      document.getElementById('confCursoTurno').textContent = `${cursoConTaller} • Turno ${turno} (${fechaFormateada})`;
 
       let pres = 0, tard = 0, ause = 0;
       const listaObs = [];
 
       alumnosActuales.forEach(al => {
-        if (al.estado === 'Presente') pres++;
-        else if (al.estado === 'Tardanza') {
+        if (al.estado === 'Presente') {
+          pres++;
+          if (al.observacion) {
+            listaObs.push(`<strong>${al.nombre}:</strong> <span class="text-success">Presente</span> (${al.observacion})`);
+          }
+        } else if (al.estado === 'Tardanza') {
           tard++;
-          listaObs.push(`<strong>${al.nombre}:</strong> Tardanza ${al.observacion ? '(' + al.observacion + ')' : ''}`);
+          listaObs.push(`<strong>${al.nombre}:</strong> <span class="text-warning">Tardanza</span> ${al.observacion ? '(' + al.observacion + ')' : ''}`);
         } else if (al.estado === 'Ausente') {
           ause++;
           listaObs.push(`<strong>${al.nombre}:</strong> <span class="text-danger">Ausente</span> ${al.observacion ? '(' + al.observacion + ')' : ''}`);
-        } else if (al.observacion) {
-          listaObs.push(`<strong>${al.nombre}:</strong> ${al.observacion}`);
         }
       });
 
@@ -1270,9 +1293,15 @@
             else if (x.estado === 'Tardanza') t++;
             else if (x.estado === 'Ausente') a++;
           });
+          
+          const tallerNombre = (alumnosActuales.length > 0 && alumnosActuales[0].taller)
+            ? alumnosActuales[0].taller
+            : obtenerTallerDeRegistros(docente, curso, turno);
+
           APP_DATA.asistenciasHoy.unshift({
             fecha: fechaFormateada,
             docente: docente,
+            taller: tallerNombre,
             curso: curso,
             turno: turno,
             presentes: p,
@@ -1293,7 +1322,6 @@
         btn.innerHTML = `<i class="bi bi-arrow-repeat"></i><span>Reintentar Guardado</span>`;
       };
 
-      // Si se ejecuta en Apps Script
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(onExito)
@@ -1302,7 +1330,6 @@
         return;
       }
 
-      // Si se ejecuta en GitHub Pages
       try {
         const resp = await fetch(API_URL, {
           method: 'POST',
@@ -1377,11 +1404,18 @@
         return;
       }
 
-      cont.innerHTML = lista.map((g) => `
+      cont.innerHTML = lista.map((g) => {
+        let nombreTaller = g.taller ? g.taller.trim() : "";
+        if (!nombreTaller) {
+          nombreTaller = obtenerTallerDeRegistros(g.docente, g.curso, g.turno);
+        }
+        const displayTaller = nombreTaller ? nombreTaller : 'Taller';
+
+        return `
         <div class="history-card">
           <div class="d-flex justify-content-between align-items-start mb-1">
             <div>
-              <div class="fw-bold fs-6">${g.curso} &bull; ${g.taller || 'Taller'}</div>
+              <div class="fw-bold fs-6">${g.curso} &bull; ${displayTaller}</div>
               <div class="text-muted small"><i class="bi bi-person-fill"></i> ${g.docente} (${g.turno})</div>
             </div>
             <span class="badge bg-primary text-white">${g.total} alumnos</span>
@@ -1392,7 +1426,8 @@
             <span class="small text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> ${g.ausentes} Aus</span>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     let toastTimer = null;

@@ -144,6 +144,18 @@ function getInitialData() {
 }
 
 /**
+ * Normaliza cadenas quitando tildes, espacios extras y pasando a minúsculas
+ */
+function normalizarTextoServidor(str) {
+  if (!str) return "";
+  return str.toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+/**
  * Consulta el historial de asistencias guardadas para una fecha dada (formato DD/MM/AA)
  */
 function getAsistenciasPorFecha(fechaConsultada) {
@@ -157,22 +169,46 @@ function getAsistenciasPorFecha(fechaConsultada) {
     
     const numRows = Math.min(lastRow - 1, 600);
     const startRow = lastRow - numRows + 1;
-    const data = sheet.getRange(startRow, 1, numRows, 8).getValues();
+    const data = sheet.getRange(startRow, 1, numRows, 8).getDisplayValues();
+    
+    // Mapa auxiliar de Rotaciones_T3 para auto-completar taller si falta en Asistencia_Historica
+    const rotSheet = ss.getSheetByName('Rotaciones_T3');
+    const rotTallerMap = new Map();
+    if (rotSheet && rotSheet.getLastRow() >= 2) {
+      const rotData = rotSheet.getRange(2, 1, rotSheet.getLastRow() - 1, 6).getValues();
+      for (let r = 0; r < rotData.length; r++) {
+        const doc = rotData[r][4] ? normalizarTextoServidor(rotData[r][4]) : "";
+        const cur = rotData[r][2] ? normalizarTextoServidor(rotData[r][2]) : "";
+        const tal = rotData[r][3] ? rotData[r][3].toString().trim() : "";
+        if (doc && cur && tal && !rotTallerMap.has(`${doc}|${cur}`)) {
+          rotTallerMap.set(`${doc}|${cur}`, tal);
+        }
+      }
+    }
     
     const gruposMap = new Map();
+    const fechaConsultadaNorm = normalizarTextoServidor(fechaConsultada);
     
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       const fecha = row[0] ? row[0].toString().trim() : "";
-      if (fecha !== fechaConsultada) continue;
+      if (normalizarTextoServidor(fecha) !== fechaConsultadaNorm) continue;
       
       const docente = row[1] ? row[1].toString().trim() : "";
-      const taller = row[2] ? row[2].toString().trim() : "";
+      let taller = row[2] ? row[2].toString().trim() : "";
       const curso = row[3] ? row[3].toString().trim() : "";
       const turno = row[4] ? row[4].toString().trim() : "";
       const alumno = row[5] ? row[5].toString().trim() : "";
       const estado = row[6] ? row[6].toString().trim() : "Presente";
       const observacion = row[7] ? row[7].toString().trim() : "";
+      
+      // Si el taller vino vacío en el registro histórico, lo recuperamos de Rotaciones_T3
+      if (!taller) {
+        const keyRot = `${normalizarTextoServidor(docente)}|${normalizarTextoServidor(curso)}`;
+        if (rotTallerMap.has(keyRot)) {
+          taller = rotTallerMap.get(keyRot);
+        }
+      }
       
       const key = `${fecha}|${docente}|${curso}|${turno}`;
       if (!gruposMap.has(key)) {
@@ -192,6 +228,9 @@ function getAsistenciasPorFecha(fechaConsultada) {
       }
       
       const g = gruposMap.get(key);
+      if (!g.taller && taller) {
+        g.taller = taller;
+      }
       g.total++;
       if (estado === 'Presente') g.presentes++;
       else if (estado === 'Tardanza') g.tardanzas++;
@@ -225,11 +264,38 @@ function guardarAsistencia(registros, docente, fechaElegida, turnoElegido) {
     
     const filaInicio = sheet.getLastRow() + 1;
     
+    // Obtener el taller de los registros si alguno lo contiene
+    let tallerDefecto = "";
+    for (let i = 0; i < registros.length; i++) {
+      if (registros[i].taller) {
+        tallerDefecto = registros[i].taller.toString().trim();
+        break;
+      }
+    }
+    
+    // Si no vino especificado en ningún registro, buscarlo en Rotaciones_T3
+    if (!tallerDefecto && registros.length > 0 && registros[0].curso) {
+      const rotSheet = ss.getSheetByName('Rotaciones_T3');
+      if (rotSheet && rotSheet.getLastRow() >= 2) {
+        const rotData = rotSheet.getRange(2, 1, rotSheet.getLastRow() - 1, 6).getValues();
+        const docBuscado = normalizarTextoServidor(docente);
+        const curBuscado = normalizarTextoServidor(registros[0].curso);
+        for (let r = 0; r < rotData.length; r++) {
+          const doc = rotData[r][4] ? normalizarTextoServidor(rotData[r][4]) : "";
+          const cur = rotData[r][2] ? normalizarTextoServidor(rotData[r][2]) : "";
+          if (doc === docBuscado && cur === curBuscado && rotData[r][3]) {
+            tallerDefecto = rotData[r][3].toString().trim();
+            break;
+          }
+        }
+      }
+    }
+    
     // Mapeo masivo: Fecha | Docente | Taller | Curso | Turno | Alumno | Estado | Observaciones
     const filasParaGuardar = registros.map(reg => [
       fechaElegida,
       docente,
-      reg.taller || "",
+      reg.taller ? reg.taller.toString().trim() : (tallerDefecto || ""),
       reg.curso || "",
       turnoElegido || "",
       reg.nombre || "",
