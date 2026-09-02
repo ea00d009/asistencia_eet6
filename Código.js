@@ -183,6 +183,23 @@ function getInitialData() {
   const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
   const docentesSet = new Set();
   const registros = [];
+
+  // Calcular turno predominante por curso para eliminar errores de tipeo individuales en la planilla
+  const turnoCursoCounts = {};
+  for (let i = 0; i < data.length; i++) {
+    const c = data[i][2] ? data[i][2].toString().trim() : "";
+    const u = data[i][5] ? data[i][5].toString().trim().toLowerCase() : "";
+    if (c && u) {
+      if (!turnoCursoCounts[c]) turnoCursoCounts[c] = { mañana: 0, tarde: 0 };
+      if (u.indexOf("ma") !== -1) turnoCursoCounts[c].mañana++;
+      else if (u.indexOf("tar") !== -1) turnoCursoCounts[c].tarde++;
+    }
+  }
+
+  const turnoPredominanteCurso = {};
+  for (const c in turnoCursoCounts) {
+    turnoPredominanteCurso[c] = turnoCursoCounts[c].mañana >= turnoCursoCounts[c].tarde ? "mañana" : "tarde";
+  }
   
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
@@ -191,7 +208,8 @@ function getInitialData() {
     const curso = row[2] ? row[2].toString().trim() : "";
     const taller = row[3] ? row[3].toString().trim() : "";
     const docente = row[4] ? row[4].toString().trim() : "";
-    const turno = row[5] ? row[5].toString().trim().toLowerCase() : "";
+    const turnoOriginal = row[5] ? row[5].toString().trim().toLowerCase() : "";
+    const turno = (curso && turnoPredominanteCurso[curso]) ? turnoPredominanteCurso[curso] : turnoOriginal;
     
     if (docente) docentesSet.add(docente);
     

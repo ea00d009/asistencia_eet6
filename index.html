@@ -894,12 +894,38 @@
       cargarDatosServidor();
     });
 
+    function sanitizarYConsolidarDatos(data) {
+      if (!data || !data.registros) return;
+
+      const countsPorCurso = {};
+      data.registros.forEach(r => {
+        const c = r.c ? r.c.trim() : "";
+        const u = r.u ? r.u.trim().toLowerCase() : "";
+        if (!c) return;
+        if (!countsPorCurso[c]) countsPorCurso[c] = { mañana: 0, tarde: 0 };
+        if (u.indexOf('ma') !== -1) countsPorCurso[c].mañana++;
+        else if (u.indexOf('tar') !== -1) countsPorCurso[c].tarde++;
+      });
+
+      const turnoPredominante = {};
+      for (const c in countsPorCurso) {
+        turnoPredominante[c] = countsPorCurso[c].mañana >= countsPorCurso[c].tarde ? "mañana" : "tarde";
+      }
+
+      data.registros.forEach(r => {
+        if (r.c && turnoPredominante[r.c]) {
+          r.u = turnoPredominante[r.c];
+        }
+      });
+    }
+
     async function cargarDatosServidor() {
       // 1. Si está corriendo dentro del iframe de Apps Script
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(data => {
             APP_DATA = data;
+            sanitizarYConsolidarDatos(APP_DATA);
             inicializarInterfaz(data);
           })
           .withFailureHandler(err => {
@@ -916,6 +942,7 @@
         const json = await resp.json();
         if (json.success && json.data) {
           APP_DATA = json.data;
+          sanitizarYConsolidarDatos(APP_DATA);
           inicializarInterfaz(json.data);
         } else {
           throw new Error(json.error || "No se pudieron obtener los datos.");
@@ -1062,19 +1089,57 @@
       }
 
       localStorage.setItem('docente_eet6', docente);
+      autoAjustarTurnoSegunDocente();
       actualizarCursosCliente();
+    }
+
+    function autoAjustarTurnoSegunDocente() {
+      if (!APP_DATA || !APP_DATA.registros) return;
+      const docenteBuscado = document.getElementById('selectDocente').value.trim();
+      if (!docenteBuscado) return;
+      const fechaStr = document.getElementById('inputFecha').value;
+      const diaSemana = getDiaSemana(fechaStr);
+      const HORARIOS = APP_DATA.horarios || {};
+      const docenteHorarioKey = Object.keys(HORARIOS).find(k => normalizarStr(k) === normalizarStr(docenteBuscado));
+      const cursosPermitidosHoy = (docenteHorarioKey && HORARIOS[docenteHorarioKey] && diaSemana && HORARIOS[docenteHorarioKey][diaSemana])
+        ? HORARIOS[docenteHorarioKey][diaSemana]
+        : null;
+
+      const turnosHoy = new Set();
+      APP_DATA.registros.forEach(r => {
+        if (normalizarStr(r.d) === normalizarStr(docenteBuscado)) {
+          let habilitado = true;
+          if (cursosPermitidosHoy) {
+            habilitado = cursosPermitidosHoy.some(c => normalizarStr(c) === normalizarStr(r.c));
+          }
+          if (habilitado && r.u) {
+            turnosHoy.add(normalizarStr(r.u));
+          }
+        }
+      });
+
+      // Si todos los cursos asignados para hoy pertenecen a un único turno, sincronizar selectTurno
+      const selectTurno = document.getElementById('selectTurno');
+      if (turnosHoy.size === 1) {
+        const turnoUnico = Array.from(turnosHoy)[0];
+        if (turnoUnico === 'tarde' && selectTurno.value !== 'Tarde') {
+          selectTurno.value = 'Tarde';
+        } else if (turnoUnico === 'mañana' && selectTurno.value !== 'Mañana') {
+          selectTurno.value = 'Mañana';
+        }
+      }
     }
 
     function actualizarCursosCliente() {
       if (!APP_DATA || !APP_DATA.registros) return;
 
       const docenteBuscado = document.getElementById('selectDocente').value.trim();
-      const turnoBuscado = document.getElementById('selectTurno').value.trim().toLowerCase();
       const fechaStr = document.getElementById('inputFecha').value;
       const diaSemana = getDiaSemana(fechaStr);
 
       const divCurso = document.getElementById('divCurso');
       const selectCurso = document.getElementById('selectCurso');
+      const selectTurno = document.getElementById('selectTurno');
       const panelAlumnos = document.getElementById('panelAlumnos');
 
       panelAlumnos.style.display = 'none';
@@ -1083,42 +1148,62 @@
       document.getElementById('bannerDuplicado').style.display = 'none';
 
       const HORARIOS = APP_DATA.horarios || {};
-      const cursosMap = new Map();
 
+      // 1. Obtener todos los registros del docente
+      const registrosDocente = APP_DATA.registros.filter(row => 
+        normalizarStr(row.d) === normalizarStr(docenteBuscado)
+      );
+
+      // 2. Cursos permitidos hoy según HORARIOS
       const docenteHorarioKey = Object.keys(HORARIOS).find(k => normalizarStr(k) === normalizarStr(docenteBuscado));
       const cursosPermitidosHoy = (docenteHorarioKey && HORARIOS[docenteHorarioKey] && diaSemana && HORARIOS[docenteHorarioKey][diaSemana])
         ? HORARIOS[docenteHorarioKey][diaSemana]
         : null;
 
-      APP_DATA.registros.forEach(row => {
-        if (normalizarStr(row.d) === normalizarStr(docenteBuscado) && normalizarStr(row.u) === normalizarStr(turnoBuscado)) {
-          let cursoHabilitado = true;
-
-          if (cursosPermitidosHoy) {
-            if (!cursosPermitidosHoy.some(c => normalizarStr(c) === normalizarStr(row.c))) {
-              cursoHabilitado = false;
-            }
-          }
-
-          if (cursoHabilitado && row.c) {
-            cursosMap.set(row.c, row.t || "");
-          }
+      // 3. Obtener los cursos únicos del docente hoy
+      const cursosDisponiblesMap = new Map();
+      registrosDocente.forEach(row => {
+        if (!row.c) return;
+        let habilitado = true;
+        if (cursosPermitidosHoy) {
+          habilitado = cursosPermitidosHoy.some(c => normalizarStr(c) === normalizarStr(row.c));
+        }
+        if (habilitado && !cursosDisponiblesMap.has(row.c)) {
+          cursosDisponiblesMap.set(row.c, {
+            curso: row.c,
+            taller: row.t || "",
+            turno: row.u ? normalizarStr(row.u) : ""
+          });
         }
       });
 
-      const cursosLista = Array.from(cursosMap.entries())
-        .map(([curso, taller]) => ({ curso, taller }))
-        .sort((a, b) => a.curso.localeCompare(b.curso));
+      const todosCursosHoy = Array.from(cursosDisponiblesMap.values());
 
-      if (cursosLista.length === 0) {
+      // 4. Filtrar por el turno actualmente seleccionado en selectTurno
+      const turnoBuscado = selectTurno.value.trim().toLowerCase();
+      const cursosDelTurno = todosCursosHoy.filter(item => normalizarStr(item.turno) === normalizarStr(turnoBuscado));
+
+      // 5. Decisión inteligente: si hay cursos que coinciden con el turno elegido, mostrarlos.
+      // Si no hay cursos en este turno pero el docente sí tiene cursos asignados hoy en HORARIOS:
+      // mostrar todos los cursos de hoy para no bloquear al docente si toma asistencia en este turno.
+      let cursosAMostrar = [];
+      if (cursosDelTurno.length > 0) {
+        cursosAMostrar = cursosDelTurno;
+      } else if (todosCursosHoy.length > 0) {
+        cursosAMostrar = todosCursosHoy;
+      }
+
+      cursosAMostrar.sort((a, b) => a.curso.localeCompare(b.curso));
+
+      if (cursosAMostrar.length === 0) {
         selectCurso.disabled = true;
-        selectCurso.innerHTML = `<option value="">Sin cursos el ${diaSemana} a la ${document.getElementById('selectTurno').value}</option>`;
+        selectCurso.innerHTML = `<option value="">Sin cursos el ${diaSemana || 'día elegido'}</option>`;
         return;
       }
 
       selectCurso.disabled = false;
       selectCurso.innerHTML = '<option value="">Elegí el curso...</option>';
-      cursosLista.forEach(item => {
+      cursosAMostrar.forEach(item => {
         const opt = document.createElement('option');
         opt.value = item.curso;
         opt.textContent = item.taller ? `${item.curso} - ${item.taller}` : item.curso;
@@ -1145,8 +1230,7 @@
       const alumnosFiltrados = APP_DATA.registros
         .filter(r => 
           normalizarStr(r.d) === normalizarStr(docente) && 
-          normalizarStr(r.c) === normalizarStr(curso) &&
-          (!turno || !r.u || normalizarStr(r.u) === normalizarStr(turno))
+          normalizarStr(r.c) === normalizarStr(curso)
         )
         .map(r => ({
           id: r.id,
