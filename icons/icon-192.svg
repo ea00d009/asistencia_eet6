@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bgGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f4c81" />
+      <stop offset="100%" stop-color="#092847" />
+    </linearGradient>
+    <linearGradient id="gearGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="8" y="8" width="176" height="176" rx="38" fill="url(#bgGrad192)" />
+  <rect x="8" y="8" width="176" height="176" rx="38" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
+
+  <!-- Gear -->
+  <g transform="translate(96, 86)" fill="url(#gearGrad192)">
+    <path d="M-8,-54 L8,-54 L6,-43 L-6,-43 Z" />
+    <path d="M-8,-54 L8,-54 L6,-43 L-6,-43 Z" transform="rotate(45)" />
+    <path d="M-8,-54 L8,-54 L6,-43 L-6,-43 Z" transform="rotate(90)" />
+    <path d="M-8,-54 L8,-54 L6,-43 L-6,-43 Z" transform="rotate(135)" />
+    <path d="M-8,-54 L8,-54 L6,-43 L-6,-43 Z" transform="rotate(180)" />
+    <path d="M-8,-54 L8,-54 L6,-43 L-6,-43 Z" transform="rotate(225)" />
+    <path d="M-8,-54 L8,-54 L6,-43 L-6,-43 Z" transform="rotate(270)" />
+    <path d="M-8,-54 L8,-54 L6,-43 L-6,-43 Z" transform="rotate(315)" />
+    <circle r="45" fill="url(#gearGrad192)" />
+    <circle r="33" fill="#0c355b" />
+  </g>
+
+  <!-- Checkmark -->
+  <path d="M74 88 L89 103 L120 69" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Badge Text EET 6 -->
+  <rect x="46" y="142" width="100" height="26" rx="13" fill="#ffffff" />
+  <text x="96" y="160" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-size="13" font-weight="800" fill="#0f4c81" text-anchor="middle" letter-spacing="1">E.E.T. N° 6</text>
+</svg>

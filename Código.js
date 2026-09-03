@@ -61,7 +61,8 @@ function doPost(e) {
       payload.registros,
       payload.docente,
       payload.fechaElegida,
-      payload.turnoElegido
+      payload.turnoElegido,
+      payload.sobrescribir === true || payload.sobrescribir === "true"
     );
     
     return ContentService.createTextOutput(JSON.stringify({ success: true, message: res }))
@@ -337,9 +338,9 @@ function getAsistenciasPorFecha(fechaConsultada) {
 }
 
 /**
- * Guarda el lote completo de asistencia en un único llamado a la API de Sheets.
+ * Guarda o actualiza el lote completo de asistencia en la planilla de Sheets.
  */
-function guardarAsistencia(registros, docente, fechaElegida, turnoElegido) {
+function guardarAsistencia(registros, docente, fechaElegida, turnoElegido, sobrescribir = false) {
   try {
     if (!registros || !Array.isArray(registros) || registros.length === 0) {
       throw new Error("No hay alumnos para registrar.");
@@ -348,6 +349,48 @@ function guardarAsistencia(registros, docente, fechaElegida, turnoElegido) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName('Asistencia_Historica');
     if (!sheet) throw new Error("No existe la pestaña 'Asistencia_Historica'.");
+    
+    const fechaNormalizada = estandarizarFecha(fechaElegida) || Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yy");
+    
+    // Si se solicitó sobrescribir, buscar y eliminar las filas previamente guardadas para este grupo
+    if (sobrescribir && sheet.getLastRow() >= 2) {
+      const lastRow = sheet.getLastRow();
+      const numRows = lastRow - 1;
+      const dataExistente = sheet.getRange(2, 1, numRows, 5).getDisplayValues();
+      const docBuscadoNorm = normalizarTextoServidor(docente);
+      const curBuscadoNorm = normalizarTextoServidor(registros[0].curso);
+      const turBuscadoNorm = normalizarTextoServidor(turnoElegido);
+      
+      const filasABorrar = [];
+      for (let i = 0; i < dataExistente.length; i++) {
+        const fFila = estandarizarFecha(dataExistente[i][0]);
+        const dFila = normalizarTextoServidor(dataExistente[i][1]);
+        const cFila = normalizarTextoServidor(dataExistente[i][3]);
+        const uFila = normalizarTextoServidor(dataExistente[i][4]);
+        
+        if (fFila === fechaNormalizada && dFila === docBuscadoNorm && cFila === curBuscadoNorm && uFila === turBuscadoNorm) {
+          filasABorrar.push(2 + i);
+        }
+      }
+      
+      // Borrar filas agrupadas en rangos contiguos de abajo hacia arriba para evitar desfasajes
+      if (filasABorrar.length > 0) {
+        let bloqueFin = filasABorrar[filasABorrar.length - 1];
+        let cant = 1;
+        for (let b = filasABorrar.length - 2; b >= 0; b--) {
+          if (filasABorrar[b] === bloqueFin - cant) {
+            cant++;
+          } else {
+            sheet.deleteRows(bloqueFin - cant + 1, cant);
+            bloqueFin = filasABorrar[b];
+            cant = 1;
+          }
+        }
+        if (cant > 0) {
+          sheet.deleteRows(bloqueFin - cant + 1, cant);
+        }
+      }
+    }
     
     const filaInicio = sheet.getLastRow() + 1;
     
@@ -378,8 +421,6 @@ function guardarAsistencia(registros, docente, fechaElegida, turnoElegido) {
       }
     }
     
-    const fechaNormalizada = estandarizarFecha(fechaElegida) || Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yy");
-    
     // Mapeo masivo: Fecha | Docente | Taller | Curso | Turno | Alumno | Estado | Observaciones
     const filasParaGuardar = registros.map(reg => [
       fechaNormalizada,
@@ -397,7 +438,9 @@ function guardarAsistencia(registros, docente, fechaElegida, turnoElegido) {
     sheet.getRange(filaInicio, 1, 1, 8)
          .setBorder(true, false, false, false, false, false, "black", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
          
-    return `✅ Asistencia registrada correctamente (${filasParaGuardar.length} alumnos).`;
+    return sobrescribir
+      ? `✅ Asistencia actualizada correctamente (${filasParaGuardar.length} alumnos).`
+      : `✅ Asistencia registrada correctamente (${filasParaGuardar.length} alumnos).`;
   } catch (error) {
     throw new Error(error.message);
   }

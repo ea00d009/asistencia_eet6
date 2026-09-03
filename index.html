@@ -8,6 +8,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Asistencia EET6">
   <meta name="theme-color" content="#0f4c81" id="metaThemeColor">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>Asistencia Talleres - EET N° 6</title>
   
   <!-- Google Fonts & Bootstrap 5.3 -->
@@ -621,6 +624,106 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Punto indicador de alertas críticas */
+    .badge-alert-dot {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 11px;
+      height: 11px;
+      background-color: #ef4444;
+      border-radius: 50%;
+      border: 2px solid var(--card-bg);
+      box-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+      animation: pulseAlert 1.8s infinite;
+    }
+    @keyframes pulseAlert {
+      0% { transform: scale(0.95); opacity: 0.85; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.85; }
+    }
+
+    /* Banner y botón de Modo Edición */
+    .edit-mode-banner {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1.5px dashed var(--warning-color);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.86rem;
+      color: var(--text-main);
+      animation: fadeIn 0.25s ease;
+    }
+
+    .btn-modo-edicion {
+      background: #d97706 !important;
+      box-shadow: 0 4px 15px rgba(217, 119, 6, 0.35) !important;
+    }
+
+    /* Buscador rápido de alumnos */
+    .search-box-container .input-group {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1.5px solid var(--input-border);
+      background-color: var(--input-bg);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .search-box-container .input-group:focus-within {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+    .search-addon {
+      background-color: transparent !important;
+      border: none !important;
+      color: var(--text-muted) !important;
+      padding-left: 12px;
+      padding-right: 4px;
+    }
+    .search-box-container .form-control {
+      border: none !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      padding: 8px 10px;
+      font-size: 0.9rem;
+      color: var(--input-text);
+    }
+    .btn-clear-search {
+      background-color: transparent !important;
+      border: none !important;
+      color: var(--text-muted) !important;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+    .btn-clear-search:hover {
+      color: var(--danger-color) !important;
+    }
+
+    /* Modal Alertas de Inasistencias Críticas */
+    .alert-stat-card {
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid var(--card-border);
+      text-align: center;
+    }
+    .alert-stat-card.critical {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .alert-stat-card.warning {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+    .risk-student-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
   </style>
 </head>
 <body>
@@ -635,6 +738,10 @@
         <h1 class="app-title">E.E.T. N° 6 - Asistencia</h1>
       </div>
       <div class="header-actions">
+        <button id="btnAlerts" class="header-action-btn position-relative" onclick="abrirModalAlertas()" title="Monitoreo de Inasistencias Críticas" aria-label="Monitoreo de inasistencias">
+          <i class="bi bi-shield-exclamation"></i>
+          <span id="badgeAlertasCriticas" class="badge-alert-dot" style="display: none;"></span>
+        </button>
         <button id="btnHistory" class="header-action-btn" onclick="abrirModalHistorial()" title="Ver Asistencias de Hoy" aria-label="Ver asistencias">
           <i class="bi bi-clock-history"></i>
         </button>
@@ -686,13 +793,29 @@
     <!-- Banner de Asistencia Duplicada -->
     <div id="bannerDuplicado" class="duplicate-banner" style="display: none;">
       <i class="bi bi-exclamation-triangle-fill"></i>
-      <div>
-        <strong>Atención:</strong> Ya se registró asistencia para este curso y turno hoy (<span id="txtStatsDuplicado"></span>). Si guardás de nuevo, se agregará otro bloque.
+      <div class="w-100">
+        <div><strong>Atención:</strong> Ya se registró asistencia para este curso y turno hoy (<span id="txtStatsDuplicado"></span>).</div>
+        <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+          <button type="button" class="btn btn-warning btn-sm fw-bold shadow-sm" onclick="cargarAsistenciaParaEditar()">
+            <i class="bi bi-pencil-square"></i> Cargar y Editar Guardada
+          </button>
+          <span class="small text-muted">o podés registrar un bloque nuevo al guardar.</span>
+        </div>
       </div>
     </div>
 
     <!-- Panel de Asistencia de Alumnos -->
     <div id="panelAlumnos" style="display: none;">
+      <!-- Banner de Modo Edición -->
+      <div id="bannerModoEdicion" class="edit-mode-banner mb-3" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <i class="bi bi-pencil-fill me-1"></i> <strong>Modo Edición Activado:</strong> Modificando registro existente de hoy.
+          </div>
+          <button type="button" class="btn btn-link btn-sm text-reset p-0 text-decoration-underline" onclick="cancelarModoEdicion()">Cancelar</button>
+        </div>
+      </div>
+
       <!-- Barra de Estadísticas -->
       <div class="stats-bar">
         <div class="stat-pill p-stat">
@@ -707,6 +830,18 @@
           <div class="stat-num text-danger" id="countAusentes">0</div>
           <div class="stat-label">Ausentes</div>
         </div>
+      </div>
+
+      <!-- Buscador Rápido de Alumnos -->
+      <div class="search-box-container mb-3">
+        <div class="input-group">
+          <span class="input-group-text search-addon"><i class="bi bi-search"></i></span>
+          <input type="text" id="inputBuscarAlumno" class="form-control" placeholder="Buscar alumno por nombre..." oninput="filtrarAlumnosEnPantalla()" autocomplete="off">
+          <button class="btn btn-clear-search" type="button" id="btnLimpiarBusqueda" onclick="limpiarBusquedaAlumno()" style="display: none;">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        </div>
+        <div id="busquedaResultadosMsg" class="small text-muted mt-1 px-1" style="display: none;"></div>
       </div>
 
       <!-- Lista de Alumnos Dinámica -->
@@ -813,6 +948,55 @@
     </div>
   </div>
 
+  <!-- Modal de Monitoreo de Inasistencias Críticas -->
+  <div id="modalAlertas" class="modal-backdrop-custom" style="display: none;">
+    <div class="modal-content-custom">
+      <div class="modal-header-custom">
+        <h5><i class="bi bi-shield-exclamation text-danger"></i> Inasistencias Críticas</h5>
+        <button type="button" class="btn-close" onclick="cerrarModalAlertas()"></button>
+      </div>
+      <div class="modal-body-custom">
+        <!-- Resumen de Alertas -->
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <div class="alert-stat-card critical">
+              <div class="fs-4 fw-bold text-danger" id="countModalCriticos">0</div>
+              <div class="small fw-semibold text-danger">Críticos (≥ 4 aus.)</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="alert-stat-card warning">
+              <div class="fs-4 fw-bold text-warning" id="countModalAdvertencias">0</div>
+              <div class="small fw-semibold text-warning">En Alerta (2 a 3 aus.)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros dentro del Modal -->
+        <div class="mb-3">
+          <label class="form-label-custom" for="selectCursoAlertas">
+            <i class="bi bi-funnel"></i> Filtrar por Curso:
+          </label>
+          <select id="selectCursoAlertas" class="form-select form-select-sm" onchange="filtrarModalAlertas()">
+            <option value="TODOS">Todos mis cursos</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <input type="text" id="inputBuscarEnAlertas" class="form-control form-control-sm" placeholder="Buscar alumno por nombre..." oninput="filtrarModalAlertas()">
+        </div>
+
+        <!-- Lista de Alumnos en Riesgo -->
+        <div id="listaAlumnosEnRiesgo">
+          <p class="text-center text-muted py-3">Sin alumnos en riesgo.</p>
+        </div>
+      </div>
+      <div class="modal-footer-custom">
+        <button class="btn btn-secondary btn-sm" onclick="cerrarModalAlertas()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast de Notificaciones -->
   <div class="toast-container-custom" id="toastContainer" style="display: none;">
     <div class="toast-custom" id="toastBox">
@@ -887,6 +1071,7 @@
     let APP_DATA = null;
     let alumnosActuales = [];
     let indiceAlumnoNota = null;
+    let esModoEdicion = false;
 
     // Inicialización al cargar la ventana
     window.addEventListener('DOMContentLoaded', () => {
@@ -970,6 +1155,7 @@
         selectDocente.value = ultimoDocente;
         onDocenteChange();
       }
+      actualizarBadgeAlertas();
     }
 
     function abrirCalendario() {
@@ -1089,6 +1275,7 @@
       }
 
       localStorage.setItem('docente_eet6', docente);
+      actualizarBadgeAlertas();
       autoAjustarTurnoSegunDocente();
       actualizarCursosCliente();
     }
@@ -1225,6 +1412,16 @@
         return;
       }
 
+      esModoEdicion = false;
+      const bannerEdicion = document.getElementById('bannerModoEdicion');
+      if (bannerEdicion) bannerEdicion.style.display = 'none';
+      const btnGuardar = document.getElementById('btnGuardar');
+      if (btnGuardar) {
+        btnGuardar.classList.remove('btn-modo-edicion');
+        btnGuardar.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
+      }
+      limpiarBusquedaAlumno();
+
       verificarDuplicado(fechaFormateada, docente, curso, turno);
 
       const alumnosFiltrados = APP_DATA.registros
@@ -1343,6 +1540,261 @@
       });
 
       actualizarContadores();
+      filtrarAlumnosEnPantalla();
+    }
+
+    function cargarAsistenciaParaEditar() {
+      const docente = document.getElementById('selectDocente').value.trim();
+      const curso = document.getElementById('selectCurso').value.trim();
+      const turno = document.getElementById('selectTurno').value.trim();
+      const fechaStr = document.getElementById('inputFecha').value;
+      const fechaFormateada = getFechaFormateada(fechaStr);
+
+      if (!APP_DATA || !APP_DATA.asistenciasHoy) return;
+      const match = APP_DATA.asistenciasHoy.find(a => 
+        getFechaFormateada(a.fecha) === fechaFormateada && 
+        normalizarStr(a.docente) === normalizarStr(docente) && 
+        normalizarStr(a.curso) === normalizarStr(curso) &&
+        normalizarStr(a.turno) === normalizarStr(turno)
+      );
+
+      if (!match || !match.alumnos || match.alumnos.length === 0) {
+        mostrarToast("No se encontraron detalles de alumnos para este registro.", "error");
+        return;
+      }
+
+      vibrar(25);
+      esModoEdicion = true;
+
+      // Cargar estados y observaciones del registro previamente guardado
+      alumnosActuales.forEach(al => {
+        const alGuardado = match.alumnos.find(p => normalizarStr(p.nombre) === normalizarStr(al.nombre));
+        if (alGuardado) {
+          al.estado = alGuardado.estado || 'Presente';
+          al.observacion = alGuardado.observacion || '';
+        }
+      });
+
+      renderizarAlumnos(alumnosActuales);
+
+      const bannerEdicion = document.getElementById('bannerModoEdicion');
+      if (bannerEdicion) bannerEdicion.style.display = 'block';
+
+      const btnGuardar = document.getElementById('btnGuardar');
+      if (btnGuardar) {
+        btnGuardar.classList.add('btn-modo-edicion');
+        btnGuardar.innerHTML = `<i class="bi bi-pencil-square"></i><span>Actualizar Asistencia Guardada</span>`;
+      }
+
+      mostrarToast("Modo edición activado: podés modificar y actualizar los datos.", "success");
+    }
+
+    function cancelarModoEdicion() {
+      vibrar(12);
+      esModoEdicion = false;
+      const bannerEdicion = document.getElementById('bannerModoEdicion');
+      if (bannerEdicion) bannerEdicion.style.display = 'none';
+
+      const btnGuardar = document.getElementById('btnGuardar');
+      if (btnGuardar) {
+        btnGuardar.classList.remove('btn-modo-edicion');
+        btnGuardar.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
+      }
+
+      onCursoChange();
+      mostrarToast("Modo edición cancelado.", "info");
+    }
+
+    function filtrarAlumnosEnPantalla() {
+      const input = document.getElementById('inputBuscarAlumno');
+      if (!input) return;
+      const term = normalizarStr(input.value);
+      const btnClear = document.getElementById('btnLimpiarBusqueda');
+      const msg = document.getElementById('busquedaResultadosMsg');
+      const cards = document.querySelectorAll('#listaAlumnos .student-card');
+
+      if (btnClear) {
+        btnClear.style.display = term ? 'inline-flex' : 'none';
+      }
+
+      let visibles = 0;
+      cards.forEach(card => {
+        const nombreEl = card.querySelector('.student-name');
+        const nombreTexto = nombreEl ? normalizarStr(nombreEl.textContent) : "";
+        if (!term || nombreTexto.includes(term)) {
+          card.style.display = 'flex';
+          visibles++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      if (msg) {
+        if (term) {
+          msg.style.display = 'block';
+          msg.textContent = `Mostrando ${visibles} de ${cards.length} alumnos`;
+        } else {
+          msg.style.display = 'none';
+        }
+      }
+    }
+
+    function limpiarBusquedaAlumno() {
+      const input = document.getElementById('inputBuscarAlumno');
+      if (input) input.value = '';
+      filtrarAlumnosEnPantalla();
+    }
+
+    function actualizarBadgeAlertas() {
+      if (!APP_DATA || !APP_DATA.registros) return;
+      const docente = document.getElementById('selectDocente').value.trim();
+      const badge = document.getElementById('badgeAlertasCriticas');
+      if (!badge) return;
+
+      const docenteNorm = normalizarStr(docente);
+      let criticos = 0;
+
+      const alumnosVistos = new Set();
+      APP_DATA.registros.forEach(r => {
+        if (!docente || normalizarStr(r.d) === docenteNorm) {
+          const key = `${normalizarStr(r.n)}|${normalizarStr(r.c)}`;
+          if (!alumnosVistos.has(key)) {
+            alumnosVistos.add(key);
+            if ((Number(r.aus) || 0) >= 4) {
+              criticos++;
+            }
+          }
+        }
+      });
+
+      if (criticos > 0) {
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function abrirModalAlertas() {
+      vibrar(10);
+      poblarCursosEnModalAlertas();
+      renderizarAlumnosEnRiesgo();
+      document.getElementById('modalAlertas').style.display = 'flex';
+    }
+
+    function cerrarModalAlertas() {
+      document.getElementById('modalAlertas').style.display = 'none';
+    }
+
+    function poblarCursosEnModalAlertas() {
+      const select = document.getElementById('selectCursoAlertas');
+      if (!select) return;
+      const docente = document.getElementById('selectDocente').value.trim();
+      select.innerHTML = '<option value="TODOS">Todos mis cursos</option>';
+
+      if (!APP_DATA || !APP_DATA.registros) return;
+      const docenteNorm = normalizarStr(docente);
+      const cursosUnicos = new Set();
+
+      APP_DATA.registros.forEach(r => {
+        if (!docente || normalizarStr(r.d) === docenteNorm) {
+          if (r.c) cursosUnicos.add(r.c);
+        }
+      });
+
+      Array.from(cursosUnicos).sort().forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = c;
+        select.appendChild(opt);
+      });
+    }
+
+    function filtrarModalAlertas() {
+      renderizarAlumnosEnRiesgo();
+    }
+
+    function renderizarAlumnosEnRiesgo() {
+      if (!APP_DATA || !APP_DATA.registros) return;
+      const docente = document.getElementById('selectDocente').value.trim();
+      const selectCurso = document.getElementById('selectCursoAlertas');
+      const cursoFiltro = selectCurso ? selectCurso.value : 'TODOS';
+      const inputBuscar = document.getElementById('inputBuscarEnAlertas');
+      const textoFiltro = inputBuscar ? normalizarStr(inputBuscar.value) : '';
+      const docenteNorm = normalizarStr(docente);
+
+      const alumnosMap = new Map();
+      APP_DATA.registros.forEach(r => {
+        if (!docente || normalizarStr(r.d) === docenteNorm) {
+          if (cursoFiltro !== 'TODOS' && normalizarStr(r.c) !== normalizarStr(cursoFiltro)) return;
+          const key = `${normalizarStr(r.n)}|${normalizarStr(r.c)}`;
+          if (!alumnosMap.has(key)) {
+            alumnosMap.set(key, {
+              nombre: r.n,
+              curso: r.c,
+              taller: r.t || '',
+              ausentes: Number(r.aus) || 0,
+              tardanzas: Number(r.tar) || 0
+            });
+          }
+        }
+      });
+
+      const todos = Array.from(alumnosMap.values());
+      const enRiesgo = todos.filter(a => a.ausentes >= 2);
+
+      let cantCriticos = 0;
+      let cantAdvertencias = 0;
+      enRiesgo.forEach(a => {
+        if (a.ausentes >= 4) cantCriticos++;
+        else cantAdvertencias++;
+      });
+
+      const elCrit = document.getElementById('countModalCriticos');
+      const elAdv = document.getElementById('countModalAdvertencias');
+      if (elCrit) elCrit.textContent = cantCriticos;
+      if (elAdv) elAdv.textContent = cantAdvertencias;
+
+      let filtrados = enRiesgo;
+      if (textoFiltro) {
+        filtrados = enRiesgo.filter(a => normalizarStr(a.nombre).includes(textoFiltro));
+      }
+
+      filtrados.sort((a, b) => b.ausentes - a.ausentes || b.tardanzas - a.tardanzas);
+
+      const cont = document.getElementById('listaAlumnosEnRiesgo');
+      if (!cont) return;
+
+      if (filtrados.length === 0) {
+        cont.innerHTML = `
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-check-circle fs-2 text-success d-block mb-2"></i>
+            ${enRiesgo.length === 0 ? '¡Excelente! No hay alumnos con inasistencias en nivel de alerta.' : 'No se encontraron alumnos con ese nombre.'}
+          </div>
+        `;
+        return;
+      }
+
+      cont.innerHTML = filtrados.map(a => {
+        const esCritico = a.ausentes >= 4;
+        const badgeClass = esCritico ? 'badge bg-danger' : 'badge bg-warning text-dark';
+        const labelRiesgo = esCritico ? '🚨 Límite Crítico' : '⚠️ En Advertencia';
+
+        return `
+          <div class="risk-student-item">
+            <div style="min-width: 0;">
+              <div class="fw-bold text-truncate" style="font-size: 0.92rem;">${a.nombre}</div>
+              <div class="text-muted small">${a.curso} &bull; ${a.taller || 'Taller'}</div>
+            </div>
+            <div class="text-end flex-shrink-0">
+              <span class="${badgeClass} mb-1 d-inline-block">${labelRiesgo}</span>
+              <div class="small fw-bold">
+                <span class="text-danger">${a.ausentes} aus.</span> &bull; 
+                <span class="text-warning">${a.tardanzas} tard.</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function renderObsBadge(obs, index) {
@@ -1460,7 +1912,15 @@
         ? alumnosActuales[0].taller
         : obtenerTallerDeRegistros(docente, curso, turno);
       const cursoConTaller = tallerNombre ? `${curso} - ${tallerNombre}` : curso;
-      document.getElementById('confCursoTurno').textContent = `${cursoConTaller} • Turno ${turno} (${fechaFormateada})`;
+      const subInfo = esModoEdicion ? ` <span class="badge bg-warning text-dark ms-1">Modo Actualización</span>` : '';
+      document.getElementById('confCursoTurno').innerHTML = `${cursoConTaller} • Turno ${turno} (${fechaFormateada})${subInfo}`;
+
+      const btnConfirmar = document.getElementById('btnConfirmarEnvio');
+      if (btnConfirmar) {
+        btnConfirmar.innerHTML = esModoEdicion
+          ? `<i class="bi bi-pencil-square"></i> Confirmar y Actualizar`
+          : `<i class="bi bi-check-circle-fill"></i> Confirmar y Guardar`;
+      }
 
       let pres = 0, tard = 0, ause = 0;
       const listaObs = [];
@@ -1509,19 +1969,21 @@
       const fechaFormateada = getFechaFormateada(fechaOriginal);
 
       btn.disabled = true;
-      btn.innerHTML = `<span class="loading-pulse"></span><span>Guardando asistencia...</span>`;
+      btn.innerHTML = `<span class="loading-pulse"></span><span>${esModoEdicion ? 'Actualizando asistencia...' : 'Guardando asistencia...'}</span>`;
 
       const payload = {
         registros: alumnosActuales,
         docente: docente,
         fechaElegida: fechaFormateada,
-        turnoElegido: turno
+        turnoElegido: turno,
+        sobrescribir: esModoEdicion
       };
 
       const onExito = (msg) => {
         vibrar(40);
-        mostrarToast(msg || "✅ Asistencia registrada correctamente.", "success");
+        mostrarToast(msg || (esModoEdicion ? "✅ Asistencia actualizada correctamente." : "✅ Asistencia registrada correctamente."), "success");
         btn.disabled = false;
+        btn.classList.remove('btn-modo-edicion');
         btn.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
 
         if (APP_DATA && APP_DATA.asistenciasHoy) {
@@ -1536,7 +1998,7 @@
             ? alumnosActuales[0].taller
             : obtenerTallerDeRegistros(docente, curso, turno);
 
-          APP_DATA.asistenciasHoy.unshift({
+          const itemHistorial = {
             fecha: fechaFormateada,
             docente: docente,
             taller: tallerNombre,
@@ -1545,11 +2007,32 @@
             presentes: p,
             tardanzas: t,
             ausentes: a,
-            total: alumnosActuales.length
-          });
+            total: alumnosActuales.length,
+            alumnos: alumnosActuales.map(x => ({
+              nombre: x.nombre,
+              estado: x.estado,
+              observacion: x.observacion || ""
+            }))
+          };
+
+          if (esModoEdicion) {
+            const idxExistente = APP_DATA.asistenciasHoy.findIndex(item =>
+              getFechaFormateada(item.fecha) === fechaFormateada &&
+              normalizarStr(item.docente) === normalizarStr(docente) &&
+              normalizarStr(item.curso) === normalizarStr(curso) &&
+              normalizarStr(item.turno) === normalizarStr(turno)
+            );
+            if (idxExistente !== -1) {
+              APP_DATA.asistenciasHoy[idxExistente] = itemHistorial;
+            } else {
+              APP_DATA.asistenciasHoy.unshift(itemHistorial);
+            }
+          } else {
+            APP_DATA.asistenciasHoy.unshift(itemHistorial);
+          }
         }
 
-        if (APP_DATA && APP_DATA.registros) {
+        if (APP_DATA && APP_DATA.registros && !esModoEdicion) {
           alumnosActuales.forEach(x => {
             const regOriginal = APP_DATA.registros.find(r => 
               r.d && r.c && r.n &&
@@ -1562,7 +2045,13 @@
               else if (x.estado === 'Tardanza') regOriginal.tar = (regOriginal.tar || 0) + 1;
             }
           });
+          actualizarBadgeAlertas();
         }
+
+        esModoEdicion = false;
+        const bannerEdicion = document.getElementById('bannerModoEdicion');
+        if (bannerEdicion) bannerEdicion.style.display = 'none';
+        limpiarBusquedaAlumno();
 
         document.getElementById('selectCurso').value = '';
         document.getElementById('panelAlumnos').style.display = 'none';
@@ -1570,16 +2059,16 @@
       };
 
       const onError = (errMsg) => {
-        mostrarToast("Error al guardar: " + errMsg, "error");
+        mostrarToast("Error al procesar: " + errMsg, "error");
         btn.disabled = false;
-        btn.innerHTML = `<i class="bi bi-arrow-repeat"></i><span>Reintentar Guardado</span>`;
+        btn.innerHTML = `<i class="bi bi-arrow-repeat"></i><span>Reintentar</span>`;
       };
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
           .withSuccessHandler(onExito)
           .withFailureHandler(err => onError(err.message))
-          .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno);
+          .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno, esModoEdicion);
         return;
       }
 
@@ -1700,6 +2189,19 @@
       toastTimer = setTimeout(() => {
         container.style.display = 'none';
       }, 4000);
+    }
+
+    // Registro seguro de Service Worker para PWA (instalación en celular y soporte offline)
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => {
+            console.log('PWA ServiceWorker registrado con éxito en ámbito:', reg.scope);
+          })
+          .catch(err => {
+            console.log('SW no registrado (común en entorno iframe de Google Apps Script):', err.message);
+          });
+      });
     }
   </script>
 </body>
