@@ -22,12 +22,19 @@ Funciona de forma híbrida: se puede acceder directamente desde **GitHub Pages**
 - **✏️ Edición / Actualización de Asistencia Previa**: Al detectar que un curso ya fue tomado hoy, permite cargar los datos guardados con un toque y actualizar el registro existente limpiamente sin generar filas duplicadas.
 - **🚨 Monitoreo de Inasistencias Críticas**: Botón de escudo en el encabezado con badge indicador y modal interactivo para consultar qué alumnos acumulan 2-3 inasistencias (advertencia) o ≥ 4 inasistencias (límite crítico en taller), con filtros por curso y buscador.
 - **🚫 Detección de Asistencia Duplicada**: Alerta visual automática si ya se registró asistencia para ese curso, docente, turno y fecha hoy, informando cuántos presentes, tardanzas y ausentes se habían guardado.
-- **📝 Observaciones Técnicas con Chips Rápidos**: Botón de observaciones por alumno con atajos de un solo toque:
-  - 🥾 *Sin Calzado Seguridad*
-  - 👕 *Sin Ropa de Grafa*
+- **📝 Observaciones Técnicas & Novedades de Seguridad (EPP)**: Registro con apercibimiento técnico y distintivo de protección laboral:
+  - 🥾 *Sin Calzado Seguridad (EPP)*
+  - 👕 *Sin Ropa de Grafa (EPP)*
   - 🏃 *Retiro Anticipado*
   - 📄 *Certificado Médico*
   - ✍️ *Texto libre personalizado*
+- **🧾 Comprobante Digital Oficial de Cierre**: Al guardar, genera una constancia formal con código de validación único, fecha, hora, docente, taller, desglose de presentes/ausentes y botón para **enviar el parte formal directo a Preceptoría por WhatsApp**.
+- **📶 Modo Offline Real & Cola de Sincronización**: Si el docente no tiene señal en el taller, la asistencia se almacena en memoria local (`localStorage`) con confirmación inmediata y se sincroniza automáticamente con Google Sheets apenas se detecta conexión o con el botón manual de subida.
+- **🛡️ Monitor en Tiempo Real de Jefatura de Taller (Acceso PIN)**: Panel directivo protegido por PIN para verificar en vivo el estado del turno:
+  - Semáforo de talleres tomados (🟢) vs pendientes (🔴).
+  - Alumnos presentes reales en los talleres vs inasistencias generales.
+  - Conteo consolidado de novedades EPP del turno.
+- **🖨️ Parte Diario Oficial Imprimible (A4 / PDF)**: Generador con formato administrativo formal que incluye membrete del Consejo General de Educación / EET N° 6, grilla de talleres del turno, resumen y casilleros de firma para Preceptoría y Jefatura de Taller.
 - **🔍 Recuperación Automática del Nombre del Taller**: Muestra e integra el nombre del taller específico (ej: *Ajuste, Electricidad, Herrería, Mecanizado, etc.*) en el selector, el modal de confirmación y el historial.
 - **📋 Modal de Confirmación Previo**: Resumen detallado con desglose de presentes, ausencias y lista de observaciones antes de enviar los datos para evitar errores involuntarios.
 - **👀 Historial y Consulta en Tiempo Real**: Modal para consultar qué asistencias ya fueron cargadas durante el día en la escuela, con botón para recargar directamente desde la planilla.

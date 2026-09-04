@@ -724,12 +724,309 @@
       align-items: center;
       gap: 10px;
     }
+
+    /* Novedades de Seguridad / EPP */
+    .note-badge.badge-epp {
+      background: rgba(239, 68, 68, 0.15) !important;
+      color: #ef4444 !important;
+      border: 1px solid rgba(239, 68, 68, 0.35) !important;
+      font-weight: 700 !important;
+    }
+    .chip-tag.chip-tag-epp {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    [data-theme="dark"] .chip-tag.chip-tag-epp {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+    .chip-tag.chip-tag-epp:hover {
+      background: #dc2626;
+      color: white;
+    }
+
+    /* Comprobante Digital Modal */
+    .receipt-modal {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1.5px solid var(--primary-color);
+    }
+    .receipt-header-banner {
+      background: linear-gradient(135deg, #0f4c81 0%, #1e3a8a 100%);
+      color: white;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      position: relative;
+    }
+    [data-theme="dark"] .receipt-header-banner {
+      background: linear-gradient(135deg, #0369a1 0%, #0f172a 100%);
+    }
+    .receipt-seal {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: #38bdf8;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      flex-shrink: 0;
+    }
+    .receipt-title-box {
+      flex: 1;
+    }
+    .receipt-institution {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: #93c5fd;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .receipt-title {
+      margin: 0;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: white;
+    }
+    .receipt-code {
+      font-family: monospace;
+      font-size: 0.82rem;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 2px 8px;
+      border-radius: 6px;
+      color: #e2e8f0;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .receipt-status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+    .receipt-status-badge.online {
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .receipt-status-badge.offline {
+      background: rgba(245, 158, 11, 0.15);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .receipt-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: var(--bg-surface);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+    .receipt-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .receipt-value {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .receipt-alert-box {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1.5px dashed rgba(239, 68, 68, 0.4);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .receipt-alert-title {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #dc2626;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .receipt-alert-content {
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    /* Botón e Indicador de Sincronización Offline */
+    .offline-count-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background-color: #f59e0b;
+      color: #1e293b;
+      font-weight: 800;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 2px solid var(--card-bg);
+    }
+
+    /* Modal Monitor de Jefatura */
+    .jefatura-stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .jefatura-workshop-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      transition: transform 0.15s ease;
+    }
+    .jefatura-workshop-item.completed {
+      border-left: 4px solid #10b981;
+    }
+    .jefatura-workshop-item.pending {
+      border-left: 4px solid #ef4444;
+      background: rgba(239, 68, 68, 0.03);
+    }
+    .badge-status-completed {
+      background: rgba(16, 185, 129, 0.15);
+      color: #059669;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .badge-status-pending {
+      background: rgba(239, 68, 68, 0.15);
+      color: #dc2626;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    /* PIN Keypad / Input */
+    .pin-input {
+      font-size: 1.6rem;
+      letter-spacing: 12px;
+      text-align: center;
+      font-weight: 800;
+      max-width: 220px;
+      margin: 0 auto;
+    }
+
+    /* Documento Imprimible A4 */
+    #documentoImprimible {
+      display: none;
+    }
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 10pt !important;
+      }
+      .app-container, .modal-backdrop-custom, .toast-container-custom, header, .header-actions {
+        display: none !important;
+      }
+      #documentoImprimible {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 8mm 12mm !important;
+        font-family: Arial, Helvetica, sans-serif !important;
+      }
+      .print-header {
+        border-bottom: 2px solid #000;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+      .print-header h3 {
+        margin: 0;
+        font-size: 13pt;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      .print-header h4 {
+        margin: 3px 0;
+        font-size: 10.5pt;
+        font-weight: normal;
+      }
+      .print-meta-grid {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 9.5pt;
+        font-weight: bold;
+        border-bottom: 1px solid #888;
+        padding-bottom: 6px;
+      }
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 16px;
+      }
+      .print-table th, .print-table td {
+        border: 1px solid #333 !important;
+        padding: 5px 6px;
+        font-size: 8.5pt;
+      }
+      .print-table th {
+        background-color: #f2f2f2 !important;
+        font-weight: bold;
+        text-align: center;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .print-summary-box {
+        border: 1.5px solid #333;
+        padding: 8px 12px;
+        margin-bottom: 25px;
+        font-size: 9pt;
+        display: flex;
+        justify-content: space-around;
+        background-color: #fafafa !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .print-signatures {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 45px;
+        text-align: center;
+        page-break-inside: avoid;
+      }
+      .print-sig-line {
+        width: 220px;
+        border-top: 1px solid #000;
+        padding-top: 4px;
+        font-size: 8.5pt;
+        font-weight: bold;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="app-container">
     
-    <!-- Encabezado con Botones de Historial y Tema -->
+    <!-- Encabezado con Botones de Historial, Jefatura y Tema -->
     <header class="app-header">
       <div>
         <div class="app-badge">
@@ -738,6 +1035,13 @@
         <h1 class="app-title">E.E.T. N° 6 - Asistencia</h1>
       </div>
       <div class="header-actions">
+        <button id="btnOfflinePending" class="header-action-btn position-relative" style="display: none;" onclick="sincronizarColaOffline(true)" title="Sincronizar asistencias pendientes" aria-label="Sincronizar asistencias pendientes">
+          <i class="bi bi-cloud-arrow-up-fill text-warning"></i>
+          <span id="badgeOfflineCount" class="offline-count-badge">0</span>
+        </button>
+        <button id="btnJefatura" class="header-action-btn" onclick="abrirAccesoJefatura()" title="Monitor de Jefatura y Partes Oficiales" aria-label="Monitor de Jefatura">
+          <i class="bi bi-shield-lock-fill text-primary"></i>
+        </button>
         <button id="btnAlerts" class="header-action-btn position-relative" onclick="abrirModalAlertas()" title="Monitoreo de Inasistencias Críticas" aria-label="Monitoreo de inasistencias">
           <i class="bi bi-shield-exclamation"></i>
           <span id="badgeAlertasCriticas" class="badge-alert-dot" style="display: none;"></span>
@@ -997,6 +1301,267 @@
     </div>
   </div>
 
+  <!-- Modal Comprobante Digital Oficial de Cierre -->
+  <div id="modalComprobante" class="modal-backdrop-custom" style="display: none;">
+    <div class="modal-content-custom receipt-modal">
+      <div class="receipt-header-banner">
+        <div class="receipt-seal">
+          <i class="bi bi-patch-check-fill"></i>
+        </div>
+        <div class="receipt-title-box">
+          <span class="receipt-institution">E.E.T. N° 6 &bull; TALLER TÉCNICO</span>
+          <h4 class="receipt-title">Comprobante de Registro</h4>
+          <span id="receiptCode" class="receipt-code">EET6-2026-0000</span>
+        </div>
+      </div>
+      
+      <div class="modal-body-custom">
+        <!-- Badge de Estado (Online / Offline) -->
+        <div id="receiptStatusBadge" class="receipt-status-badge online mb-3">
+          <i id="receiptStatusIcon" class="bi bi-check-circle-fill"></i>
+          <span id="receiptStatusText">Registrado y Sincronizado en Planilla Oficial</span>
+        </div>
+
+        <!-- Info General -->
+        <div class="receipt-info-grid mb-3">
+          <div>
+            <div class="receipt-label">Docente:</div>
+            <div class="receipt-value text-truncate" id="receiptDocente">-</div>
+          </div>
+          <div>
+            <div class="receipt-label">Fecha y Hora:</div>
+            <div class="receipt-value" id="receiptFechaHora">-</div>
+          </div>
+          <div>
+            <div class="receipt-label">Curso y Taller:</div>
+            <div class="receipt-value text-truncate" id="receiptCursoTaller">-</div>
+          </div>
+          <div>
+            <div class="receipt-label">Turno:</div>
+            <div class="receipt-value" id="receiptTurno">-</div>
+          </div>
+        </div>
+
+        <!-- Métricas Rápidas -->
+        <div class="stats-bar mb-3">
+          <div class="stat-pill p-stat">
+            <div class="stat-num text-success" id="receiptPres">0</div>
+            <div class="stat-label">Presentes</div>
+          </div>
+          <div class="stat-pill t-stat">
+            <div class="stat-num text-warning" id="receiptTard">0</div>
+            <div class="stat-label">Tardanzas</div>
+          </div>
+          <div class="stat-pill a-stat">
+            <div class="stat-num text-danger" id="receiptAuse">0</div>
+            <div class="stat-label">Ausentes</div>
+          </div>
+        </div>
+
+        <!-- Novedades de Seguridad / EPP (si existen) -->
+        <div id="receiptSeccionEPP" class="receipt-alert-box mb-3" style="display: none;">
+          <div class="receipt-alert-title">
+            <i class="bi bi-shield-fill-exclamation text-danger"></i>
+            <span>Novedades de Seguridad / EPP</span>
+          </div>
+          <div id="receiptListaEPP" class="receipt-alert-content"></div>
+        </div>
+
+        <!-- Detalle de Alumnos Observados / Ausentes -->
+        <div id="receiptDetalleAusencias" class="small mb-3 text-muted"></div>
+      </div>
+
+      <div class="modal-footer-custom flex-column gap-2">
+        <button type="button" class="btn btn-success w-100 fw-bold d-flex align-items-center justify-content-center gap-2 py-2 shadow-sm" onclick="compartirComprobanteWhatsApp()">
+          <i class="bi bi-whatsapp fs-5"></i>
+          <span>Enviar Resumen a Preceptoría</span>
+        </button>
+        <div class="d-flex gap-2 w-100">
+          <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="copiarComprobanteAlPortapapeles()">
+            <i class="bi bi-clipboard-check"></i> Copiar Texto
+          </button>
+          <button type="button" class="btn btn-primary btn-sm flex-fill" onclick="cerrarModalComprobante()">
+            Listo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal PIN de Acceso a Jefatura / Directivos -->
+  <div id="modalPinJefatura" class="modal-backdrop-custom" style="display: none;">
+    <div class="modal-content-custom" style="max-width: 360px;">
+      <div class="modal-header-custom">
+        <h5><i class="bi bi-shield-lock-fill text-primary"></i> Acceso Directivo</h5>
+        <button type="button" class="btn-close" onclick="cerrarModalPinJefatura()"></button>
+      </div>
+      <div class="modal-body-custom text-center">
+        <p class="text-muted small mb-3">Ingresá el PIN de seguridad de Jefatura de Taller para acceder al monitor en tiempo real y emitir partes diarios:</p>
+        
+        <div class="mb-3">
+          <input type="password" id="inputPinJefatura" class="form-control pin-input" maxlength="4" placeholder="••••" autocomplete="off" inputmode="numeric" onkeyup="if(event.key==='Enter') validarPinJefatura()">
+        </div>
+        <div id="pinErrorMsg" class="small text-danger fw-bold mb-2" style="display: none;">
+          <i class="bi bi-exclamation-circle-fill"></i> PIN incorrecto. Reintentá.
+        </div>
+        <div class="small text-muted mb-2">PIN inicial por defecto: <strong>0006</strong></div>
+      </div>
+      <div class="modal-footer-custom">
+        <button class="btn btn-secondary btn-sm" onclick="cerrarModalPinJefatura()">Cancelar</button>
+        <button class="btn btn-primary btn-sm px-4 fw-bold" onclick="validarPinJefatura()">
+          Ingresar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Monitor de Jefatura de Taller -->
+  <div id="modalJefatura" class="modal-backdrop-custom" style="display: none;">
+    <div class="modal-content-custom" style="max-width: 540px;">
+      <div class="modal-header-custom">
+        <div>
+          <span class="badge bg-primary-subtle text-primary fw-bold text-uppercase" style="font-size: 0.7rem;">Control Institucional</span>
+          <h5 class="mt-1 mb-0"><i class="bi bi-building-gear text-primary"></i> Monitor de Jefatura</h5>
+        </div>
+        <button type="button" class="btn-close" onclick="cerrarModalJefatura()"></button>
+      </div>
+
+      <div class="modal-body-custom">
+        <!-- Filtros de fecha y turno de consulta -->
+        <div class="row g-2 mb-3">
+          <div class="col-7">
+            <label class="form-label-custom" for="jefaturaInputFecha">
+              <i class="bi bi-calendar3"></i> Fecha:
+            </label>
+            <input type="date" id="jefaturaInputFecha" class="form-control form-control-sm" onchange="renderizarMonitorJefatura()">
+          </div>
+          <div class="col-5">
+            <label class="form-label-custom" for="jefaturaSelectTurno">
+              <i class="bi bi-sun"></i> Turno:
+            </label>
+            <select id="jefaturaSelectTurno" class="form-select form-select-sm" onchange="renderizarMonitorJefatura()">
+              <option value="Mañana">Mañana</option>
+              <option value="Tarde">Tarde</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tarjetas de Métricas de la Guardia / Turno -->
+        <div class="row g-2 mb-3 text-center">
+          <div class="col-4">
+            <div class="jefatura-stat-card">
+              <div class="fs-4 fw-bold text-primary" id="jefTotalCursos">0</div>
+              <div class="small fw-semibold text-muted">Talleres Hoy</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="jefatura-stat-card">
+              <div class="fs-4 fw-bold text-success" id="jefCursosCompletados">0</div>
+              <div class="small fw-semibold text-success">Tomados 🟢</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="jefatura-stat-card">
+              <div class="fs-4 fw-bold text-danger" id="jefCursosPendientes">0</div>
+              <div class="small fw-semibold text-danger">Pendientes 🔴</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Métricas de Alumnos del Turno -->
+        <div class="d-flex justify-content-around p-2 mb-3 bg-light rounded-3 border" style="background: var(--bg-surface) !important; border-color: var(--card-border) !important;">
+          <div class="text-center">
+            <span class="small text-muted d-block">Presentes en Taller</span>
+            <strong class="text-success fs-5" id="jefAlumnosPresentes">0</strong>
+          </div>
+          <div class="vr"></div>
+          <div class="text-center">
+            <span class="small text-muted d-block">Ausentes Totales</span>
+            <strong class="text-danger fs-5" id="jefAlumnosAusentes">0</strong>
+          </div>
+          <div class="vr"></div>
+          <div class="text-center">
+            <span class="small text-muted d-block">Alertas EPP</span>
+            <strong class="text-warning fs-5" id="jefAlertasEPP">0</strong>
+          </div>
+        </div>
+
+        <!-- Lista de Talleres del Turno con Semáforo -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-bold small text-muted text-uppercase">Estado de Talleres del Turno:</span>
+          <span id="jefSemanaDiaBadge" class="badge bg-secondary-subtle text-secondary small">Lunes</span>
+        </div>
+        <div id="jefaturaListaTalleres" style="max-height: 280px; overflow-y: auto;">
+          <p class="text-center text-muted py-3">Cargando monitor...</p>
+        </div>
+      </div>
+
+      <div class="modal-footer-custom justify-content-between">
+        <button class="btn btn-outline-danger btn-sm" onclick="bloquearJefatura()" title="Cerrar sesión de Jefatura">
+          <i class="bi bi-lock-fill"></i> Bloquear
+        </button>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary btn-sm" onclick="renderizarMonitorJefatura()">
+            <i class="bi bi-arrow-clockwise"></i> Actualizar
+          </button>
+          <button class="btn btn-primary btn-sm fw-bold px-3" onclick="generarEImprimirParteDiario()">
+            <i class="bi bi-printer-fill"></i> Imprimir Parte Diario (PDF)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documento Formal A4 para Impresión (Oculto en pantalla, visible al imprimir) -->
+  <div id="documentoImprimible">
+    <div class="print-header">
+      <h4>CONSEJO GENERAL DE EDUCACIÓN — DIRECCIÓN DE EDUCACIÓN TÉCNICO PROFESIONAL</h4>
+      <h3>ESCUELA DE EDUCACIÓN TÉCNICA N° 6</h3>
+      <h4>PARTE DIARIO OFICIAL DE ASISTENCIA Y NOVEDADES DE TALLER</h4>
+    </div>
+    
+    <div class="print-meta-grid">
+      <div><strong>FECHA:</strong> <span id="printFecha">-</span> (<span id="printDia">-</span>)</div>
+      <div><strong>TURNO:</strong> <span id="printTurno">-</span></div>
+      <div><strong>CICLO LECTIVO:</strong> 2026</div>
+      <div><strong>EMISIÓN:</strong> <span id="printHoraEmision">-</span></div>
+    </div>
+
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th style="width: 20%;">Taller / Sección</th>
+          <th style="width: 10%;">Curso</th>
+          <th style="width: 25%;">Docente a Cargo</th>
+          <th style="width: 12%;">Estado</th>
+          <th style="width: 7%;">Pres.</th>
+          <th style="width: 7%;">Tard.</th>
+          <th style="width: 7%;">Aus.</th>
+          <th style="width: 12%;">Novedades / EPP</th>
+        </tr>
+      </thead>
+      <tbody id="printTableBody">
+        <!-- Filas dinámicas -->
+      </tbody>
+    </table>
+
+    <div class="print-summary-box">
+      <div><strong>TOTAL ALUMNOS PRESENTES EN TALLER:</strong> <span id="printTotalPres">0</span></div>
+      <div><strong>TOTAL AUSENCIAS:</strong> <span id="printTotalAus">0</span></div>
+      <div><strong>TARDANZAS:</strong> <span id="printTotalTard">0</span></div>
+      <div><strong>NOVEDADES EPP:</strong> <span id="printTotalEPP">0</span></div>
+    </div>
+
+    <div class="print-signatures">
+      <div>
+        <div class="print-sig-line">Firma y Aclaración Preceptor/a</div>
+      </div>
+      <div>
+        <div class="print-sig-line">Firma y Sello Jefatura de Taller</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast de Notificaciones -->
   <div class="toast-container-custom" id="toastContainer" style="display: none;">
     <div class="toast-custom" id="toastBox">
@@ -1072,10 +1637,128 @@
     let alumnosActuales = [];
     let indiceAlumnoNota = null;
     let esModoEdicion = false;
+    let ultimoComprobanteData = null;
+
+    const OFFLINE_QUEUE_KEY = 'asistencias_offline_queue_eet6';
+    const PIN_JEFATURA_DEFAULT = '0006';
+
+    function esObservacionSeguridad(texto) {
+      if (!texto) return false;
+      const t = normalizarStr(texto);
+      return t.includes('calzado') || t.includes('grafa') || t.includes('seguridad') || 
+             t.includes('epp') || t.includes('botin') || t.includes('antiparra') || 
+             t.includes('proteccion') || t.includes('guante');
+    }
+
+    function getColaOffline() {
+      try {
+        const data = localStorage.getItem(OFFLINE_QUEUE_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function guardarEnColaOffline(payload, comprobanteData) {
+      try {
+        const cola = getColaOffline();
+        cola.push({
+          id: 'OFF-' + Date.now(),
+          fechaGuardado: new Date().toISOString(),
+          payload: payload,
+          comprobante: comprobanteData
+        });
+        localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(cola));
+        actualizarBadgeColaOffline();
+      } catch (e) {
+        console.error("Error al guardar en cola offline:", e);
+      }
+    }
+
+    function actualizarBadgeColaOffline() {
+      const cola = getColaOffline();
+      const btn = document.getElementById('btnOfflinePending');
+      const badge = document.getElementById('badgeOfflineCount');
+      if (!btn || !badge) return;
+
+      if (cola.length > 0) {
+        badge.textContent = cola.length;
+        btn.style.display = 'flex';
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+
+    let sincronizandoOffline = false;
+    async function sincronizarColaOffline(manual = false) {
+      if (sincronizandoOffline) return;
+      const cola = getColaOffline();
+      if (cola.length === 0) {
+        if (manual) mostrarToast("No hay registros pendientes de sincronizar.", "info");
+        actualizarBadgeColaOffline();
+        return;
+      }
+
+      if (!navigator.onLine && typeof google === 'undefined') {
+        if (manual) mostrarToast("Sin conexión a internet. Reintentá cuando recuperes señal.", "error");
+        return;
+      }
+
+      sincronizandoOffline = true;
+      if (manual) mostrarToast(`Sincronizando ${cola.length} registro(s) pendiente(s)...`, "info");
+
+      const pendientesRestantes = [];
+      let exitosos = 0;
+
+      for (let i = 0; i < cola.length; i++) {
+        const item = cola[i];
+        try {
+          if (typeof google !== 'undefined' && google.script && google.script.run) {
+            await new Promise((resolve, reject) => {
+              google.script.run
+                .withSuccessHandler(resolve)
+                .withFailureHandler(reject)
+                .guardarAsistencia(item.payload.registros, item.payload.docente, item.payload.fechaElegida, item.payload.turnoElegido, item.payload.sobrescribir);
+            });
+            exitosos++;
+          } else {
+            const resp = await fetch(API_URL, {
+              method: 'POST',
+              body: JSON.stringify(item.payload)
+            });
+            const json = await resp.json();
+            if (json.success) {
+              exitosos++;
+            } else {
+              pendientesRestantes.push(item);
+            }
+          }
+        } catch (err) {
+          pendientesRestantes.push(item);
+        }
+      }
+
+      localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(pendientesRestantes));
+      actualizarBadgeColaOffline();
+      sincronizandoOffline = false;
+
+      if (exitosos > 0) {
+        vibrar(30);
+        mostrarToast(`✅ ${exitosos} registro(s) sincronizado(s) con la planilla de Sheets.`, "success");
+        if (typeof recargarHistorialServidor === 'function') {
+          recargarHistorialServidor();
+        }
+      }
+    }
+
+    window.addEventListener('online', () => {
+      sincronizarColaOffline();
+    });
 
     // Inicialización al cargar la ventana
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('inputFecha').valueAsDate = new Date();
+      actualizarBadgeColaOffline();
       cargarDatosServidor();
     });
 
@@ -1156,6 +1839,8 @@
         onDocenteChange();
       }
       actualizarBadgeAlertas();
+      actualizarBadgeColaOffline();
+      sincronizarColaOffline();
     }
 
     function abrirCalendario() {
@@ -1799,7 +2484,10 @@
 
     function renderObsBadge(obs, index) {
       if (obs && obs.trim()) {
-        return `<span class="note-badge" onclick="abrirModalNota(${index})"><i class="bi bi-tag-fill"></i> ${obs}</span>`;
+        const esSeguridad = esObservacionSeguridad(obs);
+        const claseBadge = esSeguridad ? 'note-badge badge-epp' : 'note-badge';
+        const icono = esSeguridad ? '<i class="bi bi-shield-fill-exclamation text-danger"></i> <strong>EPP:</strong>' : '<i class="bi bi-tag-fill"></i>';
+        return `<span class="${claseBadge}" onclick="abrirModalNota(${index})">${icono} ${obs}</span>`;
       }
       return `<button type="button" class="btn-add-note" onclick="abrirModalNota(${index})"><i class="bi bi-plus-circle"></i> Observaciones</button>`;
     }
@@ -1971,6 +2659,42 @@
       btn.disabled = true;
       btn.innerHTML = `<span class="loading-pulse"></span><span>${esModoEdicion ? 'Actualizando asistencia...' : 'Guardando asistencia...'}</span>`;
 
+      // Calcular métricas y novedades de seguridad EPP del lote actual
+      let p = 0, t = 0, a = 0;
+      const novedadesEPP = [];
+      alumnosActuales.forEach(x => {
+        if (x.estado === 'Presente') p++;
+        else if (x.estado === 'Tardanza') t++;
+        else if (x.estado === 'Ausente') a++;
+        if (esObservacionSeguridad(x.observacion)) {
+          novedadesEPP.push({ nombre: x.nombre, obs: x.observacion });
+        }
+      });
+
+      const tallerNombre = (alumnosActuales.length > 0 && alumnosActuales[0].taller)
+        ? alumnosActuales[0].taller
+        : obtenerTallerDeRegistros(docente, curso, turno);
+
+      const codigoComprobante = generarCodigoComprobante(docente, curso, turno, fechaFormateada);
+      const horaActual = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) + ' hs';
+
+      const comprobanteData = {
+        codigo: codigoComprobante,
+        fecha: fechaFormateada,
+        hora: horaActual,
+        docente: docente,
+        curso: curso,
+        taller: tallerNombre || 'Taller Técnico',
+        turno: turno,
+        presentes: p,
+        tardanzas: t,
+        ausentes: a,
+        total: alumnosActuales.length,
+        novedadesEPP: novedadesEPP,
+        alumnos: JSON.parse(JSON.stringify(alumnosActuales)),
+        offline: false
+      };
+
       const payload = {
         registros: alumnosActuales,
         docente: docente,
@@ -1979,25 +2703,20 @@
         sobrescribir: esModoEdicion
       };
 
-      const onExito = (msg) => {
+      const onExito = (resData, fueOffline = false) => {
         vibrar(40);
-        mostrarToast(msg || (esModoEdicion ? "✅ Asistencia actualizada correctamente." : "✅ Asistencia registrada correctamente."), "success");
+        const msg = typeof resData === 'object' ? resData.message : resData;
+        mostrarToast(msg || (esModoEdicion ? "✅ Asistencia actualizada correctamente." : "✅ Asistencia registrada correctamente."), fueOffline ? "warning" : "success");
         btn.disabled = false;
         btn.classList.remove('btn-modo-edicion');
         btn.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
 
-        if (APP_DATA && APP_DATA.asistenciasHoy) {
-          let p = 0, t = 0, a = 0;
-          alumnosActuales.forEach(x => {
-            if (x.estado === 'Presente') p++;
-            else if (x.estado === 'Tardanza') t++;
-            else if (x.estado === 'Ausente') a++;
-          });
-          
-          const tallerNombre = (alumnosActuales.length > 0 && alumnosActuales[0].taller)
-            ? alumnosActuales[0].taller
-            : obtenerTallerDeRegistros(docente, curso, turno);
+        if (resData && typeof resData === 'object' && resData.timestamp) {
+          comprobanteData.hora = resData.timestamp.split(' ')[1] ? (resData.timestamp.split(' ')[1] + ' hs') : resData.timestamp;
+        }
+        comprobanteData.offline = fueOffline;
 
+        if (APP_DATA && APP_DATA.asistenciasHoy) {
           const itemHistorial = {
             fecha: fechaFormateada,
             docente: docente,
@@ -2056,36 +2775,494 @@
         document.getElementById('selectCurso').value = '';
         document.getElementById('panelAlumnos').style.display = 'none';
         document.getElementById('bannerDuplicado').style.display = 'none';
+
+        // Abrir Comprobante Digital Oficial
+        abrirModalComprobante(comprobanteData);
       };
 
-      const onError = (errMsg) => {
-        mostrarToast("Error al procesar: " + errMsg, "error");
-        btn.disabled = false;
-        btn.innerHTML = `<i class="bi bi-arrow-repeat"></i><span>Reintentar</span>`;
-      };
+      // Si el navegador está offline, guardar directo en cola local
+      if (!navigator.onLine && typeof google === 'undefined') {
+        guardarEnColaOffline(payload, comprobanteData);
+        onExito("⚠️ Guardado en la memoria de este celular (Sin conexión). Se sincronizará automáticamente al detectar red.", true);
+        return;
+      }
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
-          .withSuccessHandler(onExito)
-          .withFailureHandler(err => onError(err.message))
+          .withSuccessHandler(res => onExito(res, false))
+          .withFailureHandler(err => {
+            guardarEnColaOffline(payload, comprobanteData);
+            onExito("⚠️ Sin respuesta del servidor. Guardado localmente en este dispositivo.", true);
+          })
           .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno, esModoEdicion);
         return;
       }
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 9000);
+
         const resp = await fetch(API_URL, {
           method: 'POST',
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+
         const json = await resp.json();
         if (json.success) {
-          onExito(json.message);
+          onExito(json, false);
         } else {
-          throw new Error(json.error || "Error al guardar la asistencia.");
+          throw new Error(json.error || "Error al procesar asistencia.");
         }
       } catch (err) {
-        onError(err.message);
+        console.warn("Fallo en guardado online, guardando en cola offline:", err.message);
+        guardarEnColaOffline(payload, comprobanteData);
+        onExito("⚠️ Sin conexión con la planilla. Guardado en este celular; se enviará automáticamente.", true);
       }
+    }
+
+    // Funciones del Comprobante Digital Oficial
+    function generarCodigoComprobante(docente, curso, turno, fechaFormateada) {
+      const fLimpia = (fechaFormateada || '').replace(/[^0-9]/g, '');
+      const tLetra = (turno || 'M')[0].toUpperCase();
+      const cLimpio = (curso || '').replace(/[^0-9]/g, '');
+      const dLimpio = normalizarStr(docente).split(' ')[0].substring(0, 3).toUpperCase();
+      const rand = Math.floor(100 + Math.random() * 900);
+      return `EET6-${fLimpia}-${tLetra}${cLimpio}-${dLimpio}${rand}`;
+    }
+
+    function abrirModalComprobante(datos) {
+      ultimoComprobanteData = datos;
+      vibrar(25);
+
+      document.getElementById('receiptCode').textContent = datos.codigo;
+      document.getElementById('receiptDocente').textContent = datos.docente;
+      document.getElementById('receiptFechaHora').textContent = `${datos.fecha} • ${datos.hora}`;
+      document.getElementById('receiptCursoTaller').textContent = `${datos.curso} - ${datos.taller}`;
+      document.getElementById('receiptTurno').textContent = datos.turno;
+
+      document.getElementById('receiptPres').textContent = datos.presentes;
+      document.getElementById('receiptTard').textContent = datos.tardanzas;
+      document.getElementById('receiptAuse').textContent = datos.ausentes;
+
+      const badge = document.getElementById('receiptStatusBadge');
+      const icon = document.getElementById('receiptStatusIcon');
+      const text = document.getElementById('receiptStatusText');
+
+      if (datos.offline) {
+        badge.className = 'receipt-status-badge offline mb-3';
+        icon.className = 'bi bi-cloud-slash-fill';
+        text.textContent = 'Guardado en Dispositivo (Sin Señal - Pendiente Sync)';
+      } else {
+        badge.className = 'receipt-status-badge online mb-3';
+        icon.className = 'bi bi-check-circle-fill';
+        text.textContent = 'Registrado y Sincronizado en Planilla Oficial';
+      }
+
+      const secEPP = document.getElementById('receiptSeccionEPP');
+      const listaEPP = document.getElementById('receiptListaEPP');
+      if (datos.novedadesEPP && datos.novedadesEPP.length > 0) {
+        listaEPP.innerHTML = datos.novedadesEPP.map(n => `<div>&bull; <strong>${n.nombre}:</strong> ${n.obs}</div>`).join('');
+        secEPP.style.display = 'block';
+      } else {
+        secEPP.style.display = 'none';
+      }
+
+      const detAus = document.getElementById('receiptDetalleAusencias');
+      const notasOtras = [];
+      const ausentesNombres = [];
+      const tardanzasNombres = [];
+
+      (datos.alumnos || []).forEach(al => {
+        if (al.estado === 'Ausente') ausentesNombres.push(al.nombre);
+        else if (al.estado === 'Tardanza') tardanzasNombres.push(al.nombre);
+        if (al.observacion && !esObservacionSeguridad(al.observacion)) {
+          notasOtras.push(`&bull; ${al.nombre}: ${al.observacion}`);
+        }
+      });
+
+      let resumenHTML = '';
+      if (ausentesNombres.length > 0) {
+        resumenHTML += `<div><strong class="text-danger">Ausentes:</strong> ${ausentesNombres.join(', ')}</div>`;
+      }
+      if (tardanzasNombres.length > 0) {
+        resumenHTML += `<div><strong class="text-warning">Tardanzas:</strong> ${tardanzasNombres.join(', ')}</div>`;
+      }
+      if (notasOtras.length > 0) {
+        resumenHTML += `<div class="mt-1"><strong>Otras notas:</strong><br>${notasOtras.join('<br>')}</div>`;
+      }
+      if (!resumenHTML) {
+        resumenHTML = '<div class="text-success"><i class="bi bi-check2-all"></i> Todo el grupo completo y presente sin novedades.</div>';
+      }
+      detAus.innerHTML = resumenHTML;
+
+      document.getElementById('modalComprobante').style.display = 'flex';
+    }
+
+    function cerrarModalComprobante() {
+      document.getElementById('modalComprobante').style.display = 'none';
+    }
+
+    function armarTextoResumenComprobante() {
+      if (!ultimoComprobanteData) return "";
+      const d = ultimoComprobanteData;
+      let msg = `📋 *REGISTRO DE ASISTENCIA - EET N° 6*\n`;
+      msg += `⚙️ *Taller:* ${d.taller} | *Curso:* ${d.curso}\n`;
+      msg += `👨‍🏫 *Docente:* ${d.docente}\n`;
+      msg += `📅 *Fecha:* ${d.fecha} • *Turno:* ${d.turno} (${d.hora})\n`;
+      msg += `🔖 *Constancia:* \`${d.codigo}\`\n`;
+      if (d.offline) msg += `⚠️ _(Guardado sin conexión en celular - pendiente sync)_\n`;
+      msg += `\n📊 *ESTADÍSTICAS DEL GRUPO:*\n`;
+      msg += `👥 Matrícula: ${d.total} alumnos\n`;
+      msg += `✅ Presentes: ${d.presentes}\n`;
+      if (d.tardanzas > 0) msg += `⏱️ Tardanzas: ${d.tardanzas}\n`;
+      if (d.ausentes > 0) {
+        const aus = (d.alumnos || []).filter(a => a.estado === 'Ausente').map(a => a.nombre);
+        msg += `❌ Ausentes: ${d.ausentes} (${aus.join(', ')})\n`;
+      }
+
+      if (d.novedadesEPP && d.novedadesEPP.length > 0) {
+        msg += `\n⚠️ *SEGURIDAD & EPP:*\n`;
+        d.novedadesEPP.forEach(n => {
+          msg += `• ${n.nombre}: ${n.obs}\n`;
+        });
+      }
+
+      msg += `\n_Registrado a través del Sistema Digital de Asistencia EET6_`;
+      return msg;
+    }
+
+    function compartirComprobanteWhatsApp() {
+      vibrar(15);
+      const texto = armarTextoResumenComprobante();
+      if (!texto) return;
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+      window.open(url, '_blank');
+    }
+
+    function copiarComprobanteAlPortapapeles() {
+      vibrar(12);
+      const texto = armarTextoResumenComprobante();
+      if (!texto) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto)
+          .then(() => mostrarToast("✅ Resumen copiado al portapapeles.", "success"))
+          .catch(() => mostrarToast("Copiado al portapapeles.", "info"));
+      } else {
+        mostrarToast("Copiado al portapapeles.", "info");
+      }
+    }
+
+    // Funciones de Acceso y Monitor de Jefatura de Taller
+    function abrirAccesoJefatura() {
+      vibrar(10);
+      const estaAutenticado = sessionStorage.getItem('jefatura_auth_eet6') === 'true';
+      if (estaAutenticado) {
+        abrirModalJefatura();
+      } else {
+        document.getElementById('inputPinJefatura').value = '';
+        document.getElementById('pinErrorMsg').style.display = 'none';
+        document.getElementById('modalPinJefatura').style.display = 'flex';
+        setTimeout(() => document.getElementById('inputPinJefatura').focus(), 100);
+      }
+    }
+
+    function validarPinJefatura() {
+      const input = document.getElementById('inputPinJefatura');
+      const val = input ? input.value.trim() : '';
+      const pinCorrecto = localStorage.getItem('jefatura_pin_eet6') || PIN_JEFATURA_DEFAULT;
+
+      if (val === pinCorrecto) {
+        vibrar(20);
+        sessionStorage.setItem('jefatura_auth_eet6', 'true');
+        cerrarModalPinJefatura();
+        abrirModalJefatura();
+      } else {
+        vibrar(40);
+        const err = document.getElementById('pinErrorMsg');
+        if (err) err.style.display = 'block';
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function cerrarModalPinJefatura() {
+      document.getElementById('modalPinJefatura').style.display = 'none';
+    }
+
+    function abrirModalJefatura() {
+      const inputF = document.getElementById('inputFecha');
+      const selectT = document.getElementById('selectTurno');
+      const jF = document.getElementById('jefaturaInputFecha');
+      const jT = document.getElementById('jefaturaSelectTurno');
+      if (inputF && jF) jF.value = inputF.value;
+      if (selectT && jT) jT.value = selectT.value;
+
+      document.getElementById('modalJefatura').style.display = 'flex';
+      renderizarMonitorJefatura();
+    }
+
+    function cerrarModalJefatura() {
+      document.getElementById('modalJefatura').style.display = 'none';
+    }
+
+    function bloquearJefatura() {
+      sessionStorage.removeItem('jefatura_auth_eet6');
+      cerrarModalJefatura();
+      mostrarToast("Sesión de Jefatura cerrada y protegida.", "info");
+    }
+
+    function renderizarMonitorJefatura() {
+      if (!APP_DATA) return;
+      const fechaVal = document.getElementById('jefaturaInputFecha').value;
+      const turnoVal = document.getElementById('jefaturaSelectTurno').value;
+      const fechaStd = getFechaFormateada(fechaVal);
+      const diaSemana = getDiaSemana(fechaVal);
+
+      const badgeDia = document.getElementById('jefSemanaDiaBadge');
+      if (badgeDia) badgeDia.textContent = diaSemana || 'Sin día';
+
+      const HORARIOS = APP_DATA.horarios || {};
+      const registros = APP_DATA.registros || [];
+      const asistenciasHoy = APP_DATA.asistenciasHoy || [];
+
+      const talleresProgramados = [];
+      const turnosNormalizados = normalizarStr(turnoVal);
+
+      for (const docente in HORARIOS) {
+        const horarioDocente = HORARIOS[docente];
+        if (horarioDocente && diaSemana && horarioDocente[diaSemana]) {
+          const cursosHoy = horarioDocente[diaSemana];
+          cursosHoy.forEach(curso => {
+            const regMatch = registros.find(r => 
+              normalizarStr(r.d) === normalizarStr(docente) && 
+              normalizarStr(r.c) === normalizarStr(curso)
+            );
+            
+            const turnoCurso = regMatch && regMatch.u ? normalizarStr(regMatch.u) : "";
+            const tallerNombre = regMatch && regMatch.t ? regMatch.t : obtenerTallerDeRegistros(docente, curso, turnoVal);
+
+            if (!turnoCurso || turnoCurso.includes(turnosNormalizados) || turnosNormalizados.includes(turnoCurso)) {
+              talleresProgramados.push({
+                docente: docente,
+                curso: curso,
+                taller: tallerNombre || 'Taller Técnico',
+                turno: turnoVal
+              });
+            }
+          });
+        }
+      }
+
+      let completadosCount = 0;
+      let pendientesCount = 0;
+      let totalPres = 0;
+      let totalAus = 0;
+      let totalEPP = 0;
+
+      const itemsVista = talleresProgramados.map(item => {
+        const asistenciaGuardada = asistenciasHoy.find(a => 
+          getFechaFormateada(a.fecha) === fechaStd &&
+          normalizarStr(a.docente) === normalizarStr(item.docente) &&
+          normalizarStr(a.curso) === normalizarStr(item.curso) &&
+          normalizarStr(a.turno) === normalizarStr(item.turno)
+        );
+
+        if (asistenciaGuardada) {
+          completadosCount++;
+          totalPres += Number(asistenciaGuardada.presentes) || 0;
+          totalAus += Number(asistenciaGuardada.ausentes) || 0;
+
+          let eppEnGrupo = 0;
+          if (asistenciaGuardada.alumnos) {
+            asistenciaGuardada.alumnos.forEach(al => {
+              if (esObservacionSeguridad(al.observacion)) eppEnGrupo++;
+            });
+          }
+          totalEPP += eppEnGrupo;
+
+          return {
+            ...item,
+            taller: asistenciaGuardada.taller || item.taller,
+            completado: true,
+            presentes: asistenciaGuardada.presentes || 0,
+            tardanzas: asistenciaGuardada.tardanzas || 0,
+            ausentes: asistenciaGuardada.ausentes || 0,
+            total: asistenciaGuardada.total || 0,
+            eppCount: eppEnGrupo,
+            alumnos: asistenciaGuardada.alumnos || []
+          };
+        } else {
+          pendientesCount++;
+          return {
+            ...item,
+            completado: false,
+            presentes: 0,
+            tardanzas: 0,
+            ausentes: 0,
+            total: 0,
+            eppCount: 0,
+            alumnos: []
+          };
+        }
+      });
+
+      document.getElementById('jefTotalCursos').textContent = talleresProgramados.length;
+      document.getElementById('jefCursosCompletados').textContent = completadosCount;
+      document.getElementById('jefCursosPendientes').textContent = pendientesCount;
+      document.getElementById('jefAlumnosPresentes').textContent = totalPres;
+      document.getElementById('jefAlumnosAusentes').textContent = totalAus;
+      document.getElementById('jefAlertasEPP').textContent = totalEPP;
+
+      const cont = document.getElementById('jefaturaListaTalleres');
+      if (itemsVista.length === 0) {
+        cont.innerHTML = `
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+            No hay talleres programados en grilla para el día ${diaSemana || 'seleccionado'} (${turnoVal}).
+          </div>
+        `;
+        return;
+      }
+
+      itemsVista.sort((a, b) => (a.completado === b.completado ? 0 : a.completado ? 1 : -1));
+
+      cont.innerHTML = itemsVista.map(w => {
+        if (w.completado) {
+          const eppBadge = w.eppCount > 0 ? `<span class="badge bg-danger ms-1"><i class="bi bi-shield-fill-exclamation"></i> ${w.eppCount} EPP</span>` : '';
+          return `
+            <div class="jefatura-workshop-item completed">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-bold fs-6 text-main">${w.curso} &bull; ${w.taller}</div>
+                  <div class="small text-muted"><i class="bi bi-person-badge"></i> Prof. ${w.docente}</div>
+                </div>
+                <span class="badge-status-completed"><i class="bi bi-check-circle-fill"></i> Tomado</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+                <div class="small fw-bold">
+                  <span class="text-success">${w.presentes} Pres.</span> &bull; 
+                  <span class="text-warning">${w.tardanzas} Tard.</span> &bull; 
+                  <span class="text-danger">${w.ausentes} Aus.</span>
+                  ${eppBadge}
+                </div>
+                <span class="small text-muted">${w.total} alumnos</span>
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="jefatura-workshop-item pending">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-bold fs-6 text-danger">${w.curso} &bull; ${w.taller}</div>
+                  <div class="small text-muted"><i class="bi bi-person-badge"></i> Prof. ${w.docente}</div>
+                </div>
+                <span class="badge-status-pending"><i class="bi bi-clock-fill"></i> Pendiente</span>
+              </div>
+              <div class="small text-muted mt-2 pt-1 border-top">
+                <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i> Aún no se registró la asistencia en este turno.
+              </div>
+            </div>
+          `;
+        }
+      }).join('');
+    }
+
+    function generarEImprimirParteDiario() {
+      const fechaVal = document.getElementById('jefaturaInputFecha').value;
+      const turnoVal = document.getElementById('jefaturaSelectTurno').value;
+      const fechaStd = getFechaFormateada(fechaVal);
+      const diaSemana = getDiaSemana(fechaVal);
+
+      document.getElementById('printFecha').textContent = fechaStd;
+      document.getElementById('printDia').textContent = diaSemana;
+      document.getElementById('printTurno').textContent = turnoVal;
+      document.getElementById('printHoraEmision').textContent = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) + ' hs';
+
+      document.getElementById('printTotalPres').textContent = document.getElementById('jefAlumnosPresentes').textContent;
+      document.getElementById('printTotalAus').textContent = document.getElementById('jefAlumnosAusentes').textContent;
+      document.getElementById('printTotalEPP').textContent = document.getElementById('jefAlertasEPP').textContent;
+
+      let tardTotal = 0;
+      const asistenciasHoy = APP_DATA ? APP_DATA.asistenciasHoy : [];
+      asistenciasHoy.forEach(a => {
+        if (getFechaFormateada(a.fecha) === fechaStd && normalizarStr(a.turno) === normalizarStr(turnoVal)) {
+          tardTotal += Number(a.tardanzas) || 0;
+        }
+      });
+      document.getElementById('printTotalTard').textContent = tardTotal;
+
+      const tbody = document.getElementById('printTableBody');
+      const HORARIOS = (APP_DATA && APP_DATA.horarios) || {};
+      const registros = (APP_DATA && APP_DATA.registros) || [];
+      const turnosNormalizados = normalizarStr(turnoVal);
+
+      let filasHTML = '';
+      for (const docente in HORARIOS) {
+        const horarioDocente = HORARIOS[docente];
+        if (horarioDocente && diaSemana && horarioDocente[diaSemana]) {
+          horarioDocente[diaSemana].forEach(curso => {
+            const regMatch = registros.find(r => normalizarStr(r.d) === normalizarStr(docente) && normalizarStr(r.c) === normalizarStr(curso));
+            const turnoCurso = regMatch && regMatch.u ? normalizarStr(regMatch.u) : "";
+            const tallerNombre = (regMatch && regMatch.t) ? regMatch.t : obtenerTallerDeRegistros(docente, curso, turnoVal);
+
+            if (!turnoCurso || turnoCurso.includes(turnosNormalizados) || turnosNormalizados.includes(turnoCurso)) {
+              const guardado = asistenciasHoy.find(a => 
+                getFechaFormateada(a.fecha) === fechaStd &&
+                normalizarStr(a.docente) === normalizarStr(docente) &&
+                normalizarStr(a.curso) === normalizarStr(curso) &&
+                normalizarStr(a.turno) === normalizarStr(turnoVal)
+              );
+
+              if (guardado) {
+                const novedades = [];
+                if (guardado.alumnos) {
+                  guardado.alumnos.forEach(al => {
+                    if (al.observacion) {
+                      const esEPP = esObservacionSeguridad(al.observacion);
+                      novedades.push(`${esEPP ? '[EPP] ' : ''}${al.nombre}: ${al.observacion}`);
+                    }
+                  });
+                }
+                const textoNovedades = novedades.length > 0 ? novedades.join('; ') : 'Sin novedades';
+
+                filasHTML += `
+                  <tr>
+                    <td><strong>${guardado.taller || tallerNombre}</strong></td>
+                    <td style="text-align: center;">${curso}</td>
+                    <td>${docente}</td>
+                    <td style="text-align: center; font-weight: bold; color: green;">COMPLETO</td>
+                    <td style="text-align: center;">${guardado.presentes || 0}</td>
+                    <td style="text-align: center;">${guardado.tardanzas || 0}</td>
+                    <td style="text-align: center; color: red; font-weight: bold;">${guardado.ausentes || 0}</td>
+                    <td style="font-size: 8pt;">${textoNovedades}</td>
+                  </tr>
+                `;
+              } else {
+                filasHTML += `
+                  <tr style="background-color: #fff4f4;">
+                    <td><strong>${tallerNombre}</strong></td>
+                    <td style="text-align: center;">${curso}</td>
+                    <td>${docente}</td>
+                    <td style="text-align: center; font-weight: bold; color: red;">PENDIENTE</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="font-size: 8pt; color: #888;">Asistencia no registrada</td>
+                  </tr>
+                `;
+              }
+            }
+          });
+        }
+      }
+
+      tbody.innerHTML = filasHTML || `<tr><td colspan="8" style="text-align:center;">No hay registros programados</td></tr>`;
+
+      vibrar(20);
+      window.print();
     }
 
     function abrirModalHistorial() {

@@ -65,8 +65,15 @@ function doPost(e) {
       payload.sobrescribir === true || payload.sobrescribir === "true"
     );
     
-    return ContentService.createTextOutput(JSON.stringify({ success: true, message: res }))
-                         .setMimeType(ContentService.MimeType.JSON);
+    const timestamp = Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yyyy HH:mm:ss");
+    const msg = typeof res === 'object' ? res.message : res;
+
+    return ContentService.createTextOutput(JSON.stringify({ 
+      success: true, 
+      message: msg,
+      timestamp: timestamp,
+      totalAlumnos: (payload.registros && payload.registros.length) || 0
+    })).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, error: error.message }))
                          .setMimeType(ContentService.MimeType.JSON);
@@ -438,9 +445,16 @@ function guardarAsistencia(registros, docente, fechaElegida, turnoElegido, sobre
     sheet.getRange(filaInicio, 1, 1, 8)
          .setBorder(true, false, false, false, false, false, "black", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
          
-    return sobrescribir
+    const timestampStr = Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yyyy HH:mm:ss");
+    const msg = sobrescribir
       ? `✅ Asistencia actualizada correctamente (${filasParaGuardar.length} alumnos).`
       : `✅ Asistencia registrada correctamente (${filasParaGuardar.length} alumnos).`;
+
+    return {
+      message: msg,
+      timestamp: timestampStr,
+      totalAlumnos: filasParaGuardar.length
+    };
   } catch (error) {
     throw new Error(error.message);
   }
