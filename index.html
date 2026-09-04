@@ -1938,6 +1938,9 @@
           <i class="bi bi-lock-fill"></i> Bloquear
         </button>
         <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-outline-success btn-sm fw-bold px-3 d-flex align-items-center gap-1 shadow-sm" onclick="exportarParteDiarioExcel()" title="Descargar planilla Excel / CSV con el resumen y nómina de alumnos">
+            <i class="bi bi-file-earmark-excel-fill text-success"></i> Exportar Excel / CSV
+          </button>
           <button class="btn btn-success btn-sm fw-bold px-3 d-flex align-items-center gap-1 shadow-sm" onclick="compartirResumenTurnoWhatsApp()" title="Enviar resumen consolidado a Preceptoría por WhatsApp">
             <i class="bi bi-whatsapp"></i> WhatsApp Preceptoría
           </button>
@@ -3917,6 +3920,211 @@
 
       const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank');
+    }
+
+    /**
+     * Exporta a formato CSV compatible con Microsoft Excel (con BOM UTF-8 y delimitador ;)
+     * el reporte consolidado del turno seleccionado:
+     * 1. Encabezado y Metadatos Institucionales
+     * 2. Resumen Estadístico del Turno
+     * 3. Tabla Consolidada por Taller (Tomados y Pendientes)
+     * 4. Nómina Completa de Alumnos con Estado y Observaciones/EPP
+     */
+    function exportarParteDiarioExcel() {
+      vibrar(20);
+      if (!APP_DATA) {
+        mostrarToast("No hay datos disponibles para exportar.", "warning");
+        return;
+      }
+
+      const fechaVal = document.getElementById('jefaturaInputFecha').value;
+      const turnoVal = document.getElementById('jefaturaSelectTurno').value;
+      const fechaStd = getFechaFormateada(fechaVal);
+      const diaSemana = getDiaSemana(fechaVal);
+      const horaEmision = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) + ' hs';
+
+      const totalTalleres = document.getElementById('jefTotalCursos').textContent || '0';
+      const tomados = document.getElementById('jefCursosCompletados').textContent || '0';
+      const pendientes = document.getElementById('jefCursosPendientes').textContent || '0';
+      const presentes = document.getElementById('jefAlumnosPresentes').textContent || '0';
+      const ausentes = document.getElementById('jefAlumnosAusentes').textContent || '0';
+      const epp = document.getElementById('jefAlertasEPP').textContent || '0';
+
+      const asistenciasHoy = APP_DATA.asistenciasHoy || [];
+      const HORARIOS = APP_DATA.horarios || {};
+      const registros = APP_DATA.registros || [];
+      const turnosNormalizados = normalizarStr(turnoVal);
+
+      // Función auxiliar para escapar campos CSV
+      const esc = (val) => {
+        if (val === null || val === undefined) return '""';
+        const str = String(val).replace(/"/g, '""');
+        return `"${str}"`;
+      };
+
+      let csv = '\uFEFF'; // BOM UTF-8 para que Excel reconozca tildes, ñ y caracteres especiales automáticamente
+
+      // 1. Encabezado institucional
+      csv += `sep=;\r\n`; // Instrucción para Excel para garantizar apertura directa en columnas con punto y coma
+      csv += `${esc("ESCUELA DE EDUCACIÓN TÉCNICA N° 6")};;;;;;\r\n`;
+      csv += `${esc("PARTE DIARIO OFICIAL DE ASISTENCIA Y NOVEDADES DE TALLER")};;;;;;\r\n`;
+      csv += `${esc("FECHA:")};${esc(fechaStd + " (" + diaSemana + ")")};${esc("TURNO:")};${esc(turnoVal)};${esc("CICLO:")};${esc("2026")};${esc("HORA:")};${esc(horaEmision)}\r\n`;
+      csv += `;;;;;;;\r\n`;
+
+      // 2. Resumen numérico del turno
+      csv += `${esc("--- RESUMEN GENERAL DEL TURNO ---")};;;;;;\r\n`;
+      csv += `${esc("Talleres Programados")};${esc(totalTalleres)};;;;;;\r\n`;
+      csv += `${esc("Talleres Tomados")};${esc(tomados)};;;;;;\r\n`;
+      csv += `${esc("Talleres Pendientes")};${esc(pendientes)};;;;;;\r\n`;
+      csv += `${esc("Alumnos Presentes")};${esc(presentes)};;;;;;\r\n`;
+      csv += `${esc("Alumnos Ausentes")};${esc(ausentes)};;;;;;\r\n`;
+      csv += `${esc("Alertas EPP / Seguridad")};${esc(epp)};;;;;;\r\n`;
+      csv += `;;;;;;;\r\n`;
+
+      // 3. Tabla Consolidada por Taller
+      csv += `${esc("--- DETALLE DE TALLERES DEL TURNO ---")};;;;;;\r\n`;
+      csv += [
+        esc("Curso"),
+        esc("Taller / Especialidad"),
+        esc("Docente a Cargo"),
+        esc("Turno"),
+        esc("Estado Asistencia"),
+        esc("Total Alumnos"),
+        esc("Presentes"),
+        esc("Tardanzas"),
+        esc("Ausentes"),
+        esc("Alertas EPP"),
+        esc("Novedades / Observaciones")
+      ].join(';') + '\r\n';
+
+      const todosLosAlumnos = [];
+
+      for (const docente in HORARIOS) {
+        const horarioDocente = HORARIOS[docente];
+        if (horarioDocente && diaSemana && horarioDocente[diaSemana]) {
+          horarioDocente[diaSemana].forEach(curso => {
+            const regMatch = registros.find(r => 
+              normalizarStr(r.d) === normalizarStr(docente) && 
+              normalizarStr(r.c) === normalizarStr(curso)
+            );
+            const turnoCurso = regMatch && regMatch.u ? normalizarStr(regMatch.u) : "";
+            const tallerNombre = (regMatch && regMatch.t) ? regMatch.t : (obtenerTallerDeRegistros(docente, curso, turnoVal) || 'Taller Técnico');
+
+            if (!turnoCurso || turnoCurso.includes(turnosNormalizados) || turnosNormalizados.includes(turnoCurso)) {
+              const guardado = asistenciasHoy.find(a => 
+                getFechaFormateada(a.fecha) === fechaStd &&
+                normalizarStr(a.docente) === normalizarStr(docente) &&
+                normalizarStr(a.curso) === normalizarStr(curso) &&
+                normalizarStr(a.turno) === normalizarStr(turnoVal)
+              );
+
+              if (guardado) {
+                let eppCount = 0;
+                const novedades = [];
+                if (guardado.alumnos && Array.isArray(guardado.alumnos)) {
+                  guardado.alumnos.forEach((al) => {
+                    const esEPP = esObservacionSeguridad(al.observacion);
+                    if (esEPP) eppCount++;
+                    if (al.observacion) {
+                      novedades.push(`${esEPP ? '[EPP] ' : ''}${al.nombre}: ${al.observacion}`);
+                    }
+                    todosLosAlumnos.push({
+                      curso: curso,
+                      taller: guardado.taller || tallerNombre,
+                      docente: docente,
+                      turno: turnoVal,
+                      alumno: al.nombre,
+                      estado: al.estado,
+                      observacion: al.observacion || '',
+                      esEPP: esEPP
+                    });
+                  });
+                }
+
+                csv += [
+                  esc(curso),
+                  esc(guardado.taller || tallerNombre),
+                  esc(docente),
+                  esc(turnoVal),
+                  esc("TOMADO"),
+                  esc(guardado.total || (Number(guardado.presentes || 0) + Number(guardado.ausentes || 0))),
+                  esc(guardado.presentes || 0),
+                  esc(guardado.tardanzas || 0),
+                  esc(guardado.ausentes || 0),
+                  esc(eppCount),
+                  esc(novedades.length > 0 ? novedades.join(' | ') : "Sin novedades")
+                ].join(';') + '\r\n';
+
+              } else {
+                csv += [
+                  esc(curso),
+                  esc(tallerNombre),
+                  esc(docente),
+                  esc(turnoVal),
+                  esc("PENDIENTE"),
+                  esc("-"),
+                  esc(0),
+                  esc(0),
+                  esc(0),
+                  esc(0),
+                  esc("Asistencia aún no registrada en este turno")
+                ].join(';') + '\r\n';
+              }
+            }
+          });
+        }
+      }
+
+      csv += `;;;;;;;\r\n`;
+
+      // 4. Nómina Completa de Alumnos
+      csv += `${esc("--- NÓMINA INDIVIDUAL DE ESTUDIANTES DEL TURNO ---")};;;;;;\r\n`;
+      csv += [
+        esc("N°"),
+        esc("Curso"),
+        esc("Taller"),
+        esc("Docente"),
+        esc("Estudiante"),
+        esc("Estado"),
+        esc("Seguridad / EPP"),
+        esc("Observación / Justificación")
+      ].join(';') + '\r\n';
+
+      if (todosLosAlumnos.length === 0) {
+        csv += `${esc("-")};${esc("-")};${esc("-")};${esc("-")};${esc("Sin alumnos registrados todavía")};${esc("-")};${esc("-")};${esc("-")}\r\n`;
+      } else {
+        todosLosAlumnos.forEach((al, index) => {
+          csv += [
+            esc(index + 1),
+            esc(al.curso),
+            esc(al.taller),
+            esc(al.docente),
+            esc(al.alumno),
+            esc(al.estado),
+            esc(al.esEPP ? "ALERTA EPP" : "Normal"),
+            esc(al.observacion || "-")
+          ].join(';') + '\r\n';
+        });
+      }
+
+      // Descarga del archivo
+      const fechaSanitizada = fechaStd.replace(/\//g, '-');
+      const nombreArchivo = `Parte_Diario_EET6_${fechaSanitizada}_Turno_${turnoVal}.csv`;
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", nombreArchivo);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+
+      mostrarToast(`📊 Planilla descargada: ${nombreArchivo}`, "success");
     }
 
     function abrirModalHistorial() {
