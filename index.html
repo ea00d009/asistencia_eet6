@@ -705,6 +705,30 @@
       box-shadow: 0 4px 15px rgba(217, 119, 6, 0.35) !important;
     }
 
+    /* Aviso de Modo Pruebas (Horario Desbloqueado) */
+    .aviso-modo-pruebas {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-left: 4px solid var(--warning-color);
+      border-radius: 12px;
+      padding: 9px 12px;
+      margin-top: 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .aviso-modo-pruebas:hover {
+      background: rgba(245, 158, 11, 0.18);
+      transform: translateY(-1px);
+    }
+    [data-theme="dark"] .aviso-modo-pruebas {
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+
     /* Buscador rápido de alumnos */
     .search-box-container .input-group {
       border-radius: 10px;
@@ -1419,9 +1443,6 @@
           <div class="app-badge mb-0">
             <i class="bi bi-gear-wide-connected"></i> Taller Técnico
           </div>
-          <span id="badgeModoPruebasHeader" class="badge bg-warning text-dark align-items-center gap-1 shadow-sm" style="display: none; font-size: 0.74rem; cursor: pointer; padding: 4px 8px; border-radius: 12px;" onclick="abrirAccesoJefatura()" title="Modo Libre / Pruebas Activo. Clic para configurar en Jefatura">
-            <i class="bi bi-unlock-fill"></i> Modo Pruebas (Horario Libre)
-          </span>
         </div>
         <h1 class="app-title">E.E.T. N° 6 - Asistencia</h1>
       </div>
@@ -1541,8 +1562,22 @@
       <!-- Lista de Alumnos Dinámica -->
       <div id="listaAlumnos"></div>
 
+      <!-- Aviso de Modo Pruebas (Horario Desbloqueado) -->
+      <div id="avisoModoPruebas" class="aviso-modo-pruebas" onclick="abrirAccesoJefatura()" title="Modo Pruebas / Horario Desbloqueado activo. Clic para configurar en Jefatura">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-unlock-fill text-warning fs-5"></i>
+          <div>
+            <div class="fw-bold text-warning-emphasis" style="font-size: 0.84rem;">Modo Pruebas (Horario Desbloqueado)</div>
+            <div class="text-muted" style="font-size: 0.74rem;">Asistencia habilitada fuera de turno y horario escolar para pruebas.</div>
+          </div>
+        </div>
+        <span class="badge bg-warning text-dark fw-bold px-2 py-1" style="font-size: 0.7rem; border-radius: 8px;">
+          <i class="bi bi-sliders"></i> Jefatura
+        </span>
+      </div>
+
       <!-- Botón de Guardado -->
-      <button id="btnGuardar" class="btn-submit w-100 mt-3" onclick="abrirModalConfirmacion()">
+      <button id="btnGuardar" class="btn-submit w-100 mt-2" onclick="abrirModalConfirmacion()">
         <i class="bi bi-cloud-arrow-up-fill"></i>
         <span>Guardar Asistencia</span>
       </button>
@@ -2083,9 +2118,9 @@
 
     function actualizarEstadoModoLibreUI() {
       const activo = esModoLibreHorario();
-      const badgeHeader = document.getElementById('badgeModoPruebasHeader');
-      if (badgeHeader) {
-        badgeHeader.style.display = activo ? 'inline-flex' : 'none';
+      const aviso = document.getElementById('avisoModoPruebas');
+      if (aviso) {
+        aviso.style.display = activo ? 'flex' : 'none';
       }
       const switchEl = document.getElementById('switchModoPruebas');
       if (switchEl) {
@@ -2710,6 +2745,8 @@
           </div>
         `;
         document.getElementById('btnGuardar').style.display = 'none';
+        const avisoModo = document.getElementById('avisoModoPruebas');
+        if (avisoModo) avisoModo.style.display = 'none';
         actualizarContadores();
         return;
       }
@@ -2737,6 +2774,7 @@
           btnGuardar.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
         }
       }
+      actualizarEstadoModoLibreUI();
 
       const claseBotones = !validacion.permitido ? 'botones-asistencia bloqueado' : 'botones-asistencia';
 
