@@ -1,5 +1,5 @@
 # Ignorar todo por defecto excepto los archivos necesarios para Google Apps Script
 **/**
-!Código.js
+!Codigo.js
 !index.html
 !appsscript.json
