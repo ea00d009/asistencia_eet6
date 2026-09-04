@@ -1438,11 +1438,6 @@
       </div>
     </div>
 
-    <!-- Banner de Bloqueo por Fecha Pasada o Fuera de Horario de Turno -->
-    <div id="bannerRestriccionTurno" class="alert alert-danger d-flex align-items-center gap-2 mb-3 shadow-sm" style="display: none; border-radius: 12px;">
-      <i class="bi bi-lock-fill fs-4 flex-shrink-0 text-danger"></i>
-      <div id="txtRestriccionTurno" class="small fw-semibold"></div>
-    </div>
 
     <!-- Banner de Asistencia Duplicada -->
     <div id="bannerDuplicado" class="duplicate-banner" style="display: none;">
@@ -1721,19 +1716,13 @@
         <div id="receiptDetalleAusencias" class="small mb-3 text-muted"></div>
       </div>
 
-      <div class="modal-footer-custom flex-column gap-2">
-        <button type="button" id="btnCompartirWhatsApp" class="btn btn-success w-100 fw-bold d-flex align-items-center justify-content-center gap-2 py-2 shadow-sm" onclick="compartirComprobanteWhatsApp()" style="display: none;">
-          <i class="bi bi-whatsapp fs-5"></i>
-          <span>Enviar Resumen a Preceptoría (Jefatura)</span>
+      <div class="modal-footer-custom gap-2">
+        <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="copiarComprobanteAlPortapapeles()">
+          <i class="bi bi-clipboard-check"></i> Copiar Resumen
         </button>
-        <div class="d-flex gap-2 w-100">
-          <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="copiarComprobanteAlPortapapeles()">
-            <i class="bi bi-clipboard-check"></i> Copiar Resumen
-          </button>
-          <button type="button" class="btn btn-primary btn-sm flex-fill" onclick="cerrarModalComprobante()">
-            Listo
-          </button>
-        </div>
+        <button type="button" class="btn btn-primary btn-sm flex-fill" onclick="cerrarModalComprobante()">
+          Listo
+        </button>
       </div>
     </div>
   </div>
@@ -2635,22 +2624,16 @@
       const fechaActualStr = document.getElementById('inputFecha').value;
       const validacion = validarVentanaHorariaTurno(turnoActual, fechaActualStr);
 
-      const bannerRestriccion = document.getElementById('bannerRestriccionTurno');
-      const txtRestriccion = document.getElementById('txtRestriccionTurno');
       const btnGuardar = document.getElementById('btnGuardar');
 
       if (!validacion.permitido) {
-        if (bannerRestriccion && txtRestriccion) {
-          txtRestriccion.innerHTML = `<strong>Acceso Bloqueado:</strong> ${validacion.motivo}`;
-          bannerRestriccion.style.display = 'flex';
-        }
         btnGuardar.style.display = 'flex';
         btnGuardar.disabled = true;
         btnGuardar.style.opacity = '0.55';
         btnGuardar.style.cursor = 'not-allowed';
-        btnGuardar.innerHTML = `<i class="bi bi-lock-fill"></i><span>Edición Bloqueada (Fuera de Turno)</span>`;
+        const motivoCorto = validacion.motivo.includes('días anteriores') ? 'Bloqueado (Fecha Anterior)' : 'Bloqueado (Fuera de Turno)';
+        btnGuardar.innerHTML = `<i class="bi bi-lock-fill"></i><span>${motivoCorto}</span>`;
       } else {
-        if (bannerRestriccion) bannerRestriccion.style.display = 'none';
         btnGuardar.style.display = 'flex';
         btnGuardar.disabled = false;
         btnGuardar.style.opacity = '1';
@@ -3381,12 +3364,6 @@
       }
       detAus.innerHTML = resumenHTML;
 
-      // Restricción WhatsApp: SOLO para el Jefe de Taller
-      const btnWA = document.getElementById('btnCompartirWhatsApp');
-      if (btnWA) {
-        btnWA.style.display = esJefeAutenticado() ? 'flex' : 'none';
-      }
-
       document.getElementById('modalComprobante').style.display = 'flex';
     }
 
@@ -3421,18 +3398,6 @@
 
       msg += `\n_Registrado a través del Sistema Digital de Asistencia EET6_`;
       return msg;
-    }
-
-    function compartirComprobanteWhatsApp() {
-      if (!esJefeAutenticado()) {
-        mostrarToast("Solo Jefatura de Taller tiene autorización para emitir partes vía WhatsApp.", "error");
-        return;
-      }
-      vibrar(15);
-      const texto = armarTextoResumenComprobante();
-      if (!texto) return;
-      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
-      window.open(url, '_blank');
     }
 
     function copiarComprobanteAlPortapapeles() {
