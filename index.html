@@ -49,6 +49,11 @@
       --warning-color: #f59e0b;
       --danger-color: #ef4444;
       --border-radius: 14px;
+
+      /* Variables de Scrollbar */
+      --scrollbar-track: transparent;
+      --scrollbar-thumb: rgba(148, 163, 184, 0.45);
+      --scrollbar-thumb-hover: rgba(100, 116, 139, 0.75);
     }
 
     [data-theme="dark"] {
@@ -73,12 +78,49 @@
       --badge-note-bg: rgba(245, 158, 11, 0.2);
       --badge-note-text: #fbbf24;
       --badge-note-border: rgba(245, 158, 11, 0.35);
+
+      /* Variables de Scrollbar en Tema Oscuro */
+      --scrollbar-track: transparent;
+      --scrollbar-thumb: rgba(148, 163, 184, 0.28);
+      --scrollbar-thumb-hover: rgba(148, 163, 184, 0.55);
     }
 
+    /* Scrollbars elegantes y universales */
     * {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       box-sizing: border-box;
       transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-button {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 10px;
+      transition: background 0.2s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover);
+    }
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    body.modal-open {
+      overflow: hidden !important;
     }
 
     body {
@@ -490,28 +532,33 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(4px);
-      z-index: 10000;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1050;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 16px;
+      overflow: hidden;
       animation: fadeIn 0.2s ease;
     }
 
     .modal-content-custom {
       background: var(--modal-bg);
-      border-radius: 18px;
+      border-radius: 20px;
       width: 100%;
       max-width: 480px;
-      max-height: 90vh;
-      overflow-y: auto;
+      max-height: min(92vh, 850px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       border: 1px solid var(--modal-border);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
       animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
     }
 
     .modal-header-custom {
@@ -520,6 +567,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
+      background: var(--modal-bg);
     }
 
     .modal-header-custom h5 {
@@ -533,7 +582,12 @@
     }
 
     .modal-body-custom {
-      padding: 20px;
+      padding: 18px 20px;
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      min-height: 0;
+      scrollbar-gutter: stable;
     }
 
     .modal-footer-custom {
@@ -542,6 +596,8 @@
       display: flex;
       gap: 10px;
       justify-content: flex-end;
+      flex-shrink: 0;
+      background: var(--modal-bg);
     }
 
     .chip-tag {
@@ -1099,7 +1155,6 @@
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
-        max-height: 380px !important;
       }
 
       .jefatura-workshop-item {
@@ -1928,7 +1983,7 @@
           <span class="fw-bold small text-muted text-uppercase">Estado de Talleres del Turno:</span>
           <span id="jefSemanaDiaBadge" class="badge bg-secondary-subtle text-secondary small">Lunes</span>
         </div>
-        <div id="jefaturaListaTalleres" style="max-height: 280px; overflow-y: auto;">
+        <div id="jefaturaListaTalleres">
           <p class="text-center text-muted py-3">Cargando monitor...</p>
         </div>
       </div>
@@ -2310,7 +2365,25 @@
       actualizarBadgeColaOffline();
       actualizarEstadoModoLibreUI();
       cargarDatosServidor();
+      iniciarObservadorModales();
     });
+
+    function iniciarObservadorModales() {
+      const actualizarScroll = () => {
+        const algunModalAbierto = Array.from(document.querySelectorAll('.modal-backdrop-custom')).some(m => m.style.display && m.style.display !== 'none');
+        if (algunModalAbierto) {
+          document.body.classList.add('modal-open');
+        } else {
+          document.body.classList.remove('modal-open');
+        }
+      };
+
+      const obs = new MutationObserver(actualizarScroll);
+      document.querySelectorAll('.modal-backdrop-custom').forEach(m => {
+        obs.observe(m, { attributes: true, attributeFilter: ['style', 'class'] });
+      });
+      actualizarScroll();
+    }
 
     function sanitizarYConsolidarDatos(data) {
       if (!data || !data.registros) return;
