@@ -1375,8 +1375,13 @@
     <!-- Encabezado con Botones de Historial, Jefatura y Tema -->
     <header class="app-header">
       <div>
-        <div class="app-badge">
-          <i class="bi bi-gear-wide-connected"></i> Taller Técnico
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+          <div class="app-badge mb-0">
+            <i class="bi bi-gear-wide-connected"></i> Taller Técnico
+          </div>
+          <span id="badgeModoPruebasHeader" class="badge bg-warning text-dark align-items-center gap-1 shadow-sm" style="display: none; font-size: 0.74rem; cursor: pointer; padding: 4px 8px; border-radius: 12px;" onclick="abrirAccesoJefatura()" title="Modo Libre / Pruebas Activo. Clic para configurar en Jefatura">
+            <i class="bi bi-unlock-fill"></i> Modo Pruebas (Horario Libre)
+          </span>
         </div>
         <h1 class="app-title">E.E.T. N° 6 - Asistencia</h1>
       </div>
@@ -1825,6 +1830,24 @@
           </div>
         </div>
 
+        <!-- Control de Modo Pruebas / Horario Libre (Jefatura) -->
+        <div class="card p-3 mb-3 border-warning-subtle shadow-sm" style="background: rgba(245, 158, 11, 0.08); border-radius: 12px;">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="pe-2">
+              <div class="fw-bold d-flex align-items-center gap-2 text-warning-emphasis small">
+                <i class="bi bi-clock-history fs-5 text-warning"></i>
+                <span>Habilitar Toma de Asistencia Fuera de Horario (Pruebas)</span>
+              </div>
+              <div class="small text-muted mt-1" style="font-size: 0.78rem;">
+                Permite registrar y modificar asistencias a cualquier hora y fecha en este dispositivo para realizar ensayos y pruebas del sistema.
+              </div>
+            </div>
+            <div class="form-check form-switch fs-4 m-0 flex-shrink-0">
+              <input class="form-check-input" type="checkbox" role="switch" id="switchModoPruebas" onchange="toggleModoPruebasHorario(this.checked)" style="cursor: pointer;">
+            </div>
+          </div>
+        </div>
+
         <!-- Lista de Talleres del Turno con Semáforo -->
         <div class="d-flex justify-content-between align-items-center mb-2">
           <span class="fw-bold small text-muted text-uppercase">Estado de Talleres del Turno:</span>
@@ -1999,13 +2022,44 @@
       return sessionStorage.getItem('jefatura_auth_eet6') === 'true';
     }
 
+    function esModoLibreHorario() {
+      return localStorage.getItem('eet6_modo_libre_horario') === 'true';
+    }
+
+    function toggleModoPruebasHorario(activar) {
+      localStorage.setItem('eet6_modo_libre_horario', activar ? 'true' : 'false');
+      actualizarEstadoModoLibreUI();
+      vibrar(20);
+      if (activar) {
+        mostrarToast("⚡ Modo libre activado: Asistencia habilitada fuera de turno para pruebas.", "warning");
+      } else {
+        mostrarToast("🔒 Modo horario estricto restaurado.", "info");
+      }
+      const selectCurso = document.getElementById('selectCurso');
+      if (selectCurso && selectCurso.value && document.getElementById('panelAlumnos').style.display !== 'none') {
+        renderizarAlumnos(selectCurso.value);
+      }
+    }
+
+    function actualizarEstadoModoLibreUI() {
+      const activo = esModoLibreHorario();
+      const badgeHeader = document.getElementById('badgeModoPruebasHeader');
+      if (badgeHeader) {
+        badgeHeader.style.display = activo ? 'inline-flex' : 'none';
+      }
+      const switchEl = document.getElementById('switchModoPruebas');
+      if (switchEl) {
+        switchEl.checked = activo;
+      }
+    }
+
     /**
      * Valida que la fecha sea el día de hoy y que la hora actual esté dentro de la duración del turno de taller.
-     * Si es el Jefe de Taller autenticado, permite edición administrativa en cualquier horario.
+     * Si es el Jefe de Taller autenticado o está activo el Modo Libre de Pruebas, permite edición en cualquier horario.
      */
     function validarVentanaHorariaTurno(turno, fechaInput) {
-      if (esJefeAutenticado()) {
-        return { permitido: true, esJefe: true };
+      if (esModoLibreHorario() || esJefeAutenticado()) {
+        return { permitido: true, esLibre: true };
       }
 
       const fechaElegida = getFechaFormateada(fechaInput);
@@ -2176,6 +2230,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('inputFecha').valueAsDate = new Date();
       actualizarBadgeColaOffline();
+      actualizarEstadoModoLibreUI();
       cargarDatosServidor();
     });
 
@@ -3167,7 +3222,8 @@
         fechaElegida: fechaFormateada,
         turnoElegido: turno,
         sobrescribir: esModoEdicion,
-        esJefatura: esJefeAutenticado()
+        esJefatura: esJefeAutenticado() || esModoLibreHorario(),
+        modoLibre: esModoLibreHorario()
       };
 
       const onExito = (resData, fueOffline = false) => {
@@ -3261,7 +3317,7 @@
             guardarEnColaOffline(payload, comprobanteData);
             onExito("⚠️ Sin respuesta del servidor. Guardado localmente en este dispositivo.", true);
           })
-          .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno, esModoEdicion, esJefeAutenticado());
+          .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno, esModoEdicion, esJefeAutenticado() || esModoLibreHorario());
         return;
       }
 
@@ -3458,12 +3514,17 @@
       if (inputF && jF) jF.value = inputF.value;
       if (selectT && jT) jT.value = selectT.value;
 
+      actualizarEstadoModoLibreUI();
       document.getElementById('modalJefatura').style.display = 'flex';
       renderizarMonitorJefatura();
     }
 
     function cerrarModalJefatura() {
       document.getElementById('modalJefatura').style.display = 'none';
+      const selectCurso = document.getElementById('selectCurso');
+      if (selectCurso && selectCurso.value && document.getElementById('panelAlumnos').style.display !== 'none') {
+        renderizarAlumnos(selectCurso.value);
+      }
     }
 
     function bloquearJefatura() {

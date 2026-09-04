@@ -63,7 +63,7 @@ function doPost(e) {
       payload.fechaElegida,
       payload.turnoElegido,
       payload.sobrescribir === true || payload.sobrescribir === "true",
-      payload.esJefatura === true || payload.esJefatura === "true"
+      payload.esJefatura === true || payload.esJefatura === "true" || payload.modoLibre === true || payload.modoLibre === "true"
     );
     
     const timestamp = Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yyyy HH:mm:ss");
