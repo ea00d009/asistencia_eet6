@@ -3,7 +3,7 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Asistencia EET6">
@@ -935,6 +935,347 @@
       margin: 0 auto;
     }
 
+    /* =========================================================
+       DISEÑO RESPONSIVO: ESCRITORIO (PC), TABLETS Y MÓVIL HORIZONTAL
+       ========================================================= */
+
+    /* Grilla base para alumnos y diálogos modales */
+    #listaAlumnos {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-pin-dialog {
+      max-width: 380px;
+      width: 100%;
+    }
+
+    .modal-jefatura-dialog {
+      max-width: 560px;
+      width: 100%;
+    }
+
+    .modal-historial-dialog {
+      max-width: 520px;
+      width: 100%;
+    }
+
+    .modal-alertas-dialog {
+      max-width: 520px;
+      width: 100%;
+    }
+
+    /* Tablets y Pantallas Medianas (>= 768px) */
+    @media (min-width: 768px) {
+      .app-container {
+        max-width: 920px;
+      }
+
+      body {
+        padding: 24px 20px 80px;
+      }
+
+      .app-header {
+        margin-bottom: 24px;
+      }
+
+      .app-title {
+        font-size: 1.7rem;
+      }
+
+      .card-panel {
+        padding: 22px;
+        margin-bottom: 20px;
+      }
+
+      /* Grilla de Alumnos en 2 Columnas */
+      #listaAlumnos {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .student-card {
+        margin-bottom: 0 !important;
+        height: 100%;
+      }
+
+      .stats-bar {
+        max-width: 540px;
+        margin: 0 auto 16px;
+      }
+
+      .search-box-container {
+        max-width: 640px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .btn-submit {
+        max-width: 480px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      /* Modales Ampliados en Escritorio */
+      .modal-jefatura-dialog {
+        max-width: 860px !important;
+      }
+
+      .modal-historial-dialog {
+        max-width: 720px !important;
+      }
+
+      .modal-alertas-dialog {
+        max-width: 720px !important;
+      }
+
+      #jefaturaListaTalleres {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        max-height: 380px !important;
+      }
+
+      .jefatura-workshop-item {
+        margin-bottom: 0 !important;
+      }
+
+      #listaHistorialContenido {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .history-card {
+        margin-bottom: 0 !important;
+      }
+
+      #listaAlumnosEnRiesgo {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .risk-student-item {
+        margin-bottom: 0 !important;
+      }
+    }
+
+    /* Monitores de PC y Laptops (>= 1024px) */
+    @media (min-width: 1024px) {
+      .app-container {
+        max-width: 1120px;
+      }
+
+      .student-name {
+        font-size: 0.98rem;
+      }
+
+      .btn-asistencia {
+        width: 44px;
+        height: 44px;
+        font-size: 1rem;
+      }
+    }
+
+    /* Monitores Extra Anchos (>= 1440px) */
+    @media (min-width: 1440px) {
+      .app-container {
+        max-width: 1260px;
+      }
+
+      #listaAlumnos {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* Móvil Horizontal / Modo Landscape (max-height: 550px y orientación landscape) */
+    @media (orientation: landscape) and (max-height: 550px) {
+      body {
+        padding: 8px 14px 28px;
+      }
+
+      .app-container {
+        max-width: 100%;
+      }
+
+      .app-header {
+        margin-bottom: 8px;
+      }
+
+      .app-badge {
+        padding: 2px 8px;
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+      }
+
+      .app-title {
+        font-size: 1.2rem;
+      }
+
+      .header-action-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+        border-radius: 9px;
+      }
+
+      .card-panel {
+        padding: 10px 14px;
+        margin-bottom: 10px;
+      }
+
+      .form-label-custom {
+        margin-bottom: 2px;
+        font-size: 0.78rem;
+      }
+
+      .form-control, .form-select {
+        padding: 6px 10px;
+        font-size: 0.88rem;
+      }
+
+      .stats-bar {
+        margin-bottom: 8px;
+        gap: 6px;
+      }
+
+      .stat-pill {
+        padding: 4px 6px;
+      }
+
+      .stat-num {
+        font-size: 1.05rem;
+      }
+
+      .stat-label {
+        font-size: 0.65rem;
+      }
+
+      .search-box-container {
+        margin-bottom: 8px;
+      }
+
+      /* Grilla en 2 Columnas para Celular Acostado */
+      #listaAlumnos {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .student-card {
+        padding: 8px 10px;
+        margin-bottom: 0 !important;
+      }
+
+      .student-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+        border-radius: 8px;
+      }
+
+      .student-name {
+        font-size: 0.85rem;
+      }
+
+      .btn-asistencia {
+        width: 36px;
+        height: 36px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+      }
+
+      .btn-submit {
+        padding: 10px;
+        font-size: 0.95rem;
+        max-width: 400px;
+        margin: 10px auto 0;
+      }
+
+      /* Modales en Móvil Horizontal */
+      .modal-backdrop-custom {
+        padding: 6px 10px;
+        align-items: flex-start;
+      }
+
+      .modal-content-custom {
+        max-height: 94vh;
+        margin: auto;
+      }
+
+      .modal-header-custom {
+        padding: 8px 14px;
+      }
+
+      .modal-header-custom h5 {
+        font-size: 1rem;
+      }
+
+      .modal-body-custom {
+        padding: 10px 14px;
+      }
+
+      .modal-footer-custom {
+        padding: 8px 14px;
+      }
+
+      .receipt-header-banner {
+        padding: 10px 14px;
+        gap: 10px;
+      }
+
+      .receipt-seal {
+        width: 38px;
+        height: 38px;
+        font-size: 1.3rem;
+      }
+
+      .receipt-title {
+        font-size: 1.05rem;
+      }
+
+      .receipt-info-grid {
+        padding: 8px 10px;
+        gap: 6px;
+        margin-bottom: 8px !important;
+      }
+
+      .receipt-label {
+        font-size: 0.68rem;
+      }
+
+      .receipt-value {
+        font-size: 0.82rem;
+      }
+
+      .receipt-status-badge {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+        margin-bottom: 8px !important;
+      }
+
+      .jefatura-stat-card {
+        padding: 8px 6px;
+      }
+
+      .jefatura-stat-card .fs-4 {
+        font-size: 1.15rem !important;
+      }
+
+      #jefaturaListaTalleres {
+        max-height: 160px !important;
+      }
+
+      .pin-input {
+        font-size: 1.3rem;
+        letter-spacing: 8px;
+        padding: 6px;
+      }
+    }
+
     /* Documento Imprimible A4 */
     #documentoImprimible {
       display: none;
@@ -1062,14 +1403,14 @@
 
     <!-- Panel de Selección Inicial -->
     <div class="card-panel">
-      <div class="row g-2 mb-3">
-        <div class="col-7">
+      <div class="row g-2 align-items-end">
+        <div class="col-7 col-sm-6 col-lg-3">
           <label class="form-label-custom" for="inputFecha" onclick="abrirCalendario()" style="cursor: pointer;">
             <i class="bi bi-calendar3"></i> Fecha:
           </label>
           <input type="date" id="inputFecha" class="form-control" onchange="onFiltrosChange()" onclick="abrirCalendario()">
         </div>
-        <div class="col-5">
+        <div class="col-5 col-sm-6 col-lg-3">
           <label class="form-label-custom" for="selectTurno">
             <i class="bi bi-sun"></i> Turno:
           </label>
@@ -1078,24 +1419,22 @@
             <option value="Tarde">Tarde</option>
           </select>
         </div>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label-custom" for="selectDocente">
-          <i class="bi bi-person-badge"></i> Docente:
-        </label>
-        <select id="selectDocente" class="form-select" onchange="onDocenteChange()">
-          <option value="">Cargando docentes...</option>
-        </select>
-      </div>
-
-      <div id="divCurso" style="display: none;">
-        <label class="form-label-custom" for="selectCurso">
-          <i class="bi bi-mortarboard"></i> Curso y Taller:
-        </label>
-        <select id="selectCurso" class="form-select" onchange="onCursoChange()">
-          <option value="">Seleccionar curso...</option>
-        </select>
+        <div class="col-12 col-md-6 col-lg-3">
+          <label class="form-label-custom" for="selectDocente">
+            <i class="bi bi-person-badge"></i> Docente:
+          </label>
+          <select id="selectDocente" class="form-select" onchange="onDocenteChange()">
+            <option value="">Cargando docentes...</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3" id="divCurso" style="display: none;">
+          <label class="form-label-custom" for="selectCurso">
+            <i class="bi bi-mortarboard"></i> Curso y Taller:
+          </label>
+          <select id="selectCurso" class="form-select" onchange="onCursoChange()">
+            <option value="">Seleccionar curso...</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -1241,7 +1580,7 @@
 
   <!-- Modal de Historial de Asistencias del Día -->
   <div id="modalHistorial" class="modal-backdrop-custom" style="display: none;">
-    <div class="modal-content-custom">
+    <div class="modal-content-custom modal-historial-dialog">
       <div class="modal-header-custom">
         <h5><i class="bi bi-clock-history text-primary"></i> Asistencias Registradas</h5>
         <button type="button" class="btn-close" onclick="cerrarModalHistorial()"></button>
@@ -1265,7 +1604,7 @@
 
   <!-- Modal de Monitoreo de Inasistencias Críticas -->
   <div id="modalAlertas" class="modal-backdrop-custom" style="display: none;">
-    <div class="modal-content-custom">
+    <div class="modal-content-custom modal-alertas-dialog">
       <div class="modal-header-custom">
         <h5><i class="bi bi-shield-exclamation text-danger"></i> Inasistencias Críticas</h5>
         <button type="button" class="btn-close" onclick="cerrarModalAlertas()"></button>
@@ -1401,7 +1740,7 @@
 
   <!-- Modal PIN de Acceso a Jefatura / Directivos -->
   <div id="modalPinJefatura" class="modal-backdrop-custom" style="display: none;">
-    <div class="modal-content-custom" style="max-width: 360px;">
+    <div class="modal-content-custom modal-pin-dialog">
       <div class="modal-header-custom">
         <h5><i class="bi bi-shield-lock-fill text-primary"></i> Acceso Directivo</h5>
         <button type="button" class="btn-close" onclick="cerrarModalPinJefatura()"></button>
@@ -1428,7 +1767,7 @@
 
   <!-- Modal Monitor de Jefatura de Taller -->
   <div id="modalJefatura" class="modal-backdrop-custom" style="display: none;">
-    <div class="modal-content-custom" style="max-width: 540px;">
+    <div class="modal-content-custom modal-jefatura-dialog">
       <div class="modal-header-custom">
         <div>
           <span class="badge bg-primary-subtle text-primary fw-bold text-uppercase" style="font-size: 0.7rem;">Control Institucional</span>
