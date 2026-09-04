@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="light" data-bs-theme="light">
 <head>
   <base target="_top">
   <meta charset="UTF-8">
@@ -64,8 +64,9 @@
       --card-bg: #1e293b;
       --card-border: #334155;
       --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --input-bg: #0f172a;
+      --text-muted: #cbd5e1; /* Alto contraste: Slate-300 en lugar de gris oscuro */
+      --text-secondary: #94a3b8;
+      --input-bg: #1e293b;
       --input-border: #475569;
       --input-text: #f8fafc;
       --student-card-bg: #1e293b;
@@ -75,14 +76,14 @@
       --pill-border: #334155;
       --modal-bg: #1e293b;
       --modal-border: #334155;
-      --badge-note-bg: rgba(245, 158, 11, 0.2);
-      --badge-note-text: #fbbf24;
-      --badge-note-border: rgba(245, 158, 11, 0.35);
+      --badge-note-bg: rgba(245, 158, 11, 0.22);
+      --badge-note-text: #fde68a;
+      --badge-note-border: rgba(245, 158, 11, 0.45);
 
       /* Variables de Scrollbar en Tema Oscuro */
       --scrollbar-track: transparent;
-      --scrollbar-thumb: rgba(148, 163, 184, 0.28);
-      --scrollbar-thumb-hover: rgba(148, 163, 184, 0.55);
+      --scrollbar-thumb: rgba(148, 163, 184, 0.35);
+      --scrollbar-thumb-hover: rgba(148, 163, 184, 0.65);
     }
 
     /* Scrollbars elegantes y universales */
@@ -1053,6 +1054,232 @@
       font-weight: 800;
       max-width: 220px;
       margin: 0 auto;
+    }
+
+    /* =========================================================
+       SISTEMA COMPLETO DE ALTO CONTRASTE PARA TEMA OSCURO
+       ========================================================= */
+    .text-main {
+      color: var(--text-main) !important;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+    }
+
+    /* Textos secundarios y atenuados con alto contraste WCAG */
+    [data-theme="dark"] .text-muted {
+      color: #cbd5e1 !important; /* Slate-300: contraste 9.2:1 */
+    }
+
+    [data-theme="dark"] .text-secondary {
+      color: #94a3b8 !important; /* Slate-400: contraste 5.5:1 */
+    }
+
+    /* Colores semánticos vibrantes para fondos oscuros */
+    [data-theme="dark"] .text-success {
+      color: #34d399 !important; /* Emerald-400 */
+    }
+
+    [data-theme="dark"] .text-danger {
+      color: #f87171 !important; /* Red-400 */
+    }
+
+    [data-theme="dark"] .text-warning {
+      color: #fbbf24 !important; /* Amber-400 */
+    }
+
+    [data-theme="dark"] .text-warning-emphasis {
+      color: #fbbf24 !important; /* Reemplaza el marrón oscuro por ámbar luminoso */
+    }
+
+    [data-theme="dark"] .text-primary {
+      color: #38bdf8 !important; /* Sky-400 */
+    }
+
+    [data-theme="dark"] .text-dark {
+      color: #f8fafc !important; /* Evita que texto negro quede invisible en fondo oscuro */
+    }
+
+    /* Badges y fondos sutiles */
+    [data-theme="dark"] .bg-success-subtle {
+      background-color: rgba(16, 185, 129, 0.2) !important;
+      color: #34d399 !important;
+    }
+
+    [data-theme="dark"] .bg-warning-subtle {
+      background-color: rgba(245, 158, 11, 0.2) !important;
+      color: #fbbf24 !important;
+    }
+
+    [data-theme="dark"] .bg-danger-subtle {
+      background-color: rgba(239, 68, 68, 0.2) !important;
+      color: #f87171 !important;
+    }
+
+    [data-theme="dark"] .bg-primary-subtle {
+      background-color: rgba(56, 189, 248, 0.2) !important;
+      color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .bg-secondary-subtle {
+      background-color: rgba(148, 163, 184, 0.2) !important;
+      color: #e2e8f0 !important;
+    }
+
+    [data-theme="dark"] .bg-light {
+      background-color: rgba(30, 41, 59, 0.75) !important;
+    }
+
+    /* Botones de contorno (outline) con alto contraste */
+    [data-theme="dark"] .btn-outline-primary {
+      color: #38bdf8;
+      border-color: #38bdf8;
+    }
+    [data-theme="dark"] .btn-outline-primary:hover {
+      background-color: #0284c7;
+      border-color: #0284c7;
+      color: #ffffff;
+    }
+
+    [data-theme="dark"] .btn-outline-success {
+      color: #34d399;
+      border-color: #34d399;
+    }
+    [data-theme="dark"] .btn-outline-success:hover {
+      background-color: #059669;
+      border-color: #059669;
+      color: #ffffff;
+    }
+
+    [data-theme="dark"] .btn-outline-danger {
+      color: #f87171;
+      border-color: #f87171;
+    }
+    [data-theme="dark"] .btn-outline-danger:hover {
+      background-color: #dc2626;
+      border-color: #dc2626;
+      color: #ffffff;
+    }
+
+    [data-theme="dark"] .btn-outline-warning {
+      color: #fbbf24;
+      border-color: #fbbf24;
+    }
+    [data-theme="dark"] .btn-outline-warning:hover {
+      background-color: #d97706;
+      border-color: #d97706;
+      color: #ffffff;
+    }
+
+    [data-theme="dark"] .btn-secondary {
+      background-color: #334155;
+      border-color: #475569;
+      color: #f8fafc;
+    }
+
+    /* Tarjetas de talleres en Monitor de Jefatura */
+    [data-theme="dark"] .jefatura-workshop-item {
+      background: #1e293b;
+      border-color: #334155;
+    }
+    [data-theme="dark"] .jefatura-workshop-item.pending {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+    [data-theme="dark"] .jefatura-workshop-item.completed {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+    [data-theme="dark"] .badge-status-completed {
+      background: rgba(16, 185, 129, 0.22);
+      color: #34d399;
+    }
+    [data-theme="dark"] .badge-status-pending {
+      background: rgba(239, 68, 68, 0.22);
+      color: #f87171;
+    }
+
+    /* Tarjetas de estadísticas de Jefatura */
+    [data-theme="dark"] .jefatura-stat-card {
+      background: #1e293b;
+      border-color: #334155;
+    }
+
+    /* Botón de cierre de modal accesible y visible */
+    [data-theme="dark"] .btn-close {
+      filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    /* Controles de formulario, selects y fechas */
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select {
+      background-color: #1e293b;
+      color: #f8fafc;
+      border-color: #475569;
+    }
+    [data-theme="dark"] .form-select option {
+      background-color: #1e293b;
+      color: #f8fafc;
+    }
+    [data-theme="dark"] .form-control::placeholder {
+      color: #94a3b8 !important;
+      opacity: 1;
+    }
+    [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(0.9);
+      cursor: pointer;
+    }
+
+    /* Separadores y bordes */
+    [data-theme="dark"] .border,
+    [data-theme="dark"] .border-top,
+    [data-theme="dark"] .border-bottom,
+    [data-theme="dark"] .border-start,
+    [data-theme="dark"] .border-end {
+      border-color: #334155 !important;
+    }
+    [data-theme="dark"] .vr {
+      background-color: #475569 !important;
+      opacity: 0.8;
+    }
+    [data-theme="dark"] hr {
+      border-color: #334155 !important;
+      opacity: 0.6;
+    }
+
+    /* Botones de asistencia no seleccionados (P, T, A) */
+    [data-theme="dark"] .btn-asistencia.no-seleccionado {
+      opacity: 0.65;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    [data-theme="dark"] .btn-add-note {
+      color: #93c5fd;
+      opacity: 0.95;
+    }
+    [data-theme="dark"] .btn-add-note:hover {
+      color: #38bdf8;
+      opacity: 1;
+    }
+
+    /* Píldoras de resumen numérico superior */
+    [data-theme="dark"] .stat-pill.p-stat .stat-num { color: #34d399; }
+    [data-theme="dark"] .stat-pill.t-stat .stat-num { color: #fbbf24; }
+    [data-theme="dark"] .stat-pill.a-stat .stat-num { color: #f87171; }
+
+    /* Comprobante Digital Oficial */
+    [data-theme="dark"] .receipt-status-badge.online {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.22);
+      border-color: rgba(16, 185, 129, 0.45);
+    }
+    [data-theme="dark"] .receipt-status-badge.offline {
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.22);
+      border-color: rgba(245, 158, 11, 0.45);
+    }
+    [data-theme="dark"] .receipt-alert-title {
+      color: #f87171;
     }
 
     /* =========================================================
@@ -2118,6 +2345,7 @@
 
     function setTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.setAttribute('data-bs-theme', theme);
       localStorage.setItem('theme_eet6', theme);
       const icon = document.getElementById('themeIcon');
       const meta = document.getElementById('metaThemeColor');
