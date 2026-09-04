@@ -89,7 +89,7 @@ asistencia_eet6/
 ├── .clasp.json          # Identificador del script en Google Apps Script
 ├── .claspignore         # Reglas para aislar archivos estáticos de Apps Script
 ├── appsscript.json      # Configuración de manifiesto y permisos de ejecución
-├── Codigo.js            # Backend: rotaciones, historial, API JSON y guardado/sobrescritura
+├── code.js              # Backend: rotaciones, historial, API JSON y guardado/sobrescritura
 ├── index.html           # Frontend PWA: interfaz táctil, temas, modales y lógica de asistencia
 ├── manifest.json        # Manifiesto de Progressive Web App (PWA)
 ├── sw.js                # Service Worker para caché offline y rendimiento instantáneo
