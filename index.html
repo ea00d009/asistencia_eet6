@@ -448,6 +448,11 @@
       transform: scale(0.92);
     }
 
+    .botones-asistencia.bloqueado {
+      pointer-events: none !important;
+      opacity: 0.55 !important;
+    }
+
     /* Botón Guardar */
     .btn-submit {
       background: #0f4c81;
@@ -1094,6 +1099,12 @@
       </div>
     </div>
 
+    <!-- Banner de Bloqueo por Fecha Pasada o Fuera de Horario de Turno -->
+    <div id="bannerRestriccionTurno" class="alert alert-danger d-flex align-items-center gap-2 mb-3 shadow-sm" style="display: none; border-radius: 12px;">
+      <i class="bi bi-lock-fill fs-4 flex-shrink-0 text-danger"></i>
+      <div id="txtRestriccionTurno" class="small fw-semibold"></div>
+    </div>
+
     <!-- Banner de Asistencia Duplicada -->
     <div id="bannerDuplicado" class="duplicate-banner" style="display: none;">
       <i class="bi bi-exclamation-triangle-fill"></i>
@@ -1372,13 +1383,13 @@
       </div>
 
       <div class="modal-footer-custom flex-column gap-2">
-        <button type="button" class="btn btn-success w-100 fw-bold d-flex align-items-center justify-content-center gap-2 py-2 shadow-sm" onclick="compartirComprobanteWhatsApp()">
+        <button type="button" id="btnCompartirWhatsApp" class="btn btn-success w-100 fw-bold d-flex align-items-center justify-content-center gap-2 py-2 shadow-sm" onclick="compartirComprobanteWhatsApp()" style="display: none;">
           <i class="bi bi-whatsapp fs-5"></i>
-          <span>Enviar Resumen a Preceptoría</span>
+          <span>Enviar Resumen a Preceptoría (Jefatura)</span>
         </button>
         <div class="d-flex gap-2 w-100">
           <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="copiarComprobanteAlPortapapeles()">
-            <i class="bi bi-clipboard-check"></i> Copiar Texto
+            <i class="bi bi-clipboard-check"></i> Copiar Resumen
           </button>
           <button type="button" class="btn btn-primary btn-sm flex-fill" onclick="cerrarModalComprobante()">
             Listo
@@ -1404,7 +1415,7 @@
         <div id="pinErrorMsg" class="small text-danger fw-bold mb-2" style="display: none;">
           <i class="bi bi-exclamation-circle-fill"></i> PIN incorrecto. Reintentá.
         </div>
-        <div class="small text-muted mb-2">PIN inicial por defecto: <strong>0006</strong></div>
+        <div class="small text-muted mb-2">PIN de Jefatura: <strong>2706</strong></div>
       </div>
       <div class="modal-footer-custom">
         <button class="btn btn-secondary btn-sm" onclick="cerrarModalPinJefatura()">Cancelar</button>
@@ -1496,11 +1507,14 @@
         </div>
       </div>
 
-      <div class="modal-footer-custom justify-content-between">
+      <div class="modal-footer-custom justify-content-between flex-wrap gap-2">
         <button class="btn btn-outline-danger btn-sm" onclick="bloquearJefatura()" title="Cerrar sesión de Jefatura">
           <i class="bi bi-lock-fill"></i> Bloquear
         </button>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-success btn-sm fw-bold px-3 d-flex align-items-center gap-1 shadow-sm" onclick="compartirResumenTurnoWhatsApp()" title="Enviar resumen consolidado a Preceptoría por WhatsApp">
+            <i class="bi bi-whatsapp"></i> WhatsApp Preceptoría
+          </button>
           <button class="btn btn-outline-primary btn-sm" onclick="renderizarMonitorJefatura()">
             <i class="bi bi-arrow-clockwise"></i> Actualizar
           </button>
@@ -1640,7 +1654,82 @@
     let ultimoComprobanteData = null;
 
     const OFFLINE_QUEUE_KEY = 'asistencias_offline_queue_eet6';
-    const PIN_JEFATURA_DEFAULT = '0006';
+    const PIN_JEFATURA_DEFAULT = '2706';
+
+    // Asegurar PIN 2706 en localStorage
+    if (!localStorage.getItem('jefatura_pin_eet6') || localStorage.getItem('jefatura_pin_eet6') === '0006') {
+      localStorage.setItem('jefatura_pin_eet6', PIN_JEFATURA_DEFAULT);
+    }
+
+    // Horarios oficiales de duración de los turnos de taller
+    const HORARIOS_TURNO = {
+      "Mañana": { inicio: "07:00", fin: "13:15", label: "07:00 a 13:15 hs" },
+      "Tarde":  { inicio: "13:00", fin: "19:45", label: "13:00 a 19:45 hs" }
+    };
+
+    function esJefeAutenticado() {
+      return sessionStorage.getItem('jefatura_auth_eet6') === 'true';
+    }
+
+    /**
+     * Valida que la fecha sea el día de hoy y que la hora actual esté dentro de la duración del turno de taller.
+     * Si es el Jefe de Taller autenticado, permite edición administrativa en cualquier horario.
+     */
+    function validarVentanaHorariaTurno(turno, fechaInput) {
+      if (esJefeAutenticado()) {
+        return { permitido: true, esJefe: true };
+      }
+
+      const fechaElegida = getFechaFormateada(fechaInput);
+      const fechaHoy = APP_DATA ? (APP_DATA.fechaHoyStr || getFechaFormateada(new Date())) : getFechaFormateada(new Date());
+
+      // 1. Regla de Fecha: Solo se puede tomar o modificar asistencia el día de hoy
+      if (fechaElegida !== fechaHoy) {
+        return {
+          permitido: false,
+          motivo: `Solo podés registrar o modificar asistencias correspondientes al día de hoy (${fechaHoy}). No se permite modificar asistencias de días anteriores.`
+        };
+      }
+
+      // 2. Regla de Horario: Dentro del turno de taller
+      const ahora = new Date();
+      const horaMin = ahora.getHours() * 60 + ahora.getMinutes();
+      const turnoNorm = normalizarStr(turno);
+
+      if (turnoNorm.includes("ma")) {
+        const inicioMin = 7 * 60; // 07:00
+        const finMin = 13 * 60 + 15; // 13:15
+        if (horaMin < inicioMin) {
+          return {
+            permitido: false,
+            motivo: `El turno mañana aún no ha iniciado (horario de toma: ${HORARIOS_TURNO["Mañana"].label}).`
+          };
+        }
+        if (horaMin > finMin) {
+          return {
+            permitido: false,
+            motivo: `El turno mañana ya finalizó (horario: ${HORARIOS_TURNO["Mañana"].label}). No se permite modificar asistencias fuera del horario del taller.`
+          };
+        }
+      } else if (turnoNorm.includes("tar")) {
+        const inicioMin = 13 * 60; // 13:00
+        const finMin = 19 * 60 + 45; // 19:45
+        if (horaMin < inicioMin) {
+          return {
+            permitido: false,
+            motivo: `El turno tarde aún no ha iniciado (horario de toma: ${HORARIOS_TURNO["Tarde"].label}).`
+          };
+        }
+        if (horaMin > finMin) {
+          return {
+            permitido: false,
+            motivo: `El turno tarde ya finalizó (horario: ${HORARIOS_TURNO["Tarde"].label}). No se permite modificar asistencias fuera del horario del taller.`
+          };
+        }
+      }
+
+      return { permitido: true };
+    }
 
     function esObservacionSeguridad(texto) {
       if (!texto) return false;
@@ -2169,6 +2258,14 @@
       if (match) {
         stats.textContent = `${match.presentes} Pres, ${match.tardanzas} Tard, ${match.ausentes} Aus`;
         banner.style.display = 'flex';
+
+        // Ocultar botón de editar si está fuera de turno o fecha pasada
+        const fechaStr = document.getElementById('inputFecha').value;
+        const validacion = validarVentanaHorariaTurno(turno, fechaStr);
+        const btnEditar = banner.querySelector('button');
+        if (btnEditar) {
+          btnEditar.style.display = validacion.permitido ? 'inline-block' : 'none';
+        }
       } else {
         banner.style.display = 'none';
       }
@@ -2194,7 +2291,37 @@
         return;
       }
 
-      document.getElementById('btnGuardar').style.display = 'flex';
+      // Validación estricta de turno y fecha
+      const turnoActual = document.getElementById('selectTurno').value.trim();
+      const fechaActualStr = document.getElementById('inputFecha').value;
+      const validacion = validarVentanaHorariaTurno(turnoActual, fechaActualStr);
+
+      const bannerRestriccion = document.getElementById('bannerRestriccionTurno');
+      const txtRestriccion = document.getElementById('txtRestriccionTurno');
+      const btnGuardar = document.getElementById('btnGuardar');
+
+      if (!validacion.permitido) {
+        if (bannerRestriccion && txtRestriccion) {
+          txtRestriccion.innerHTML = `<strong>Acceso Bloqueado:</strong> ${validacion.motivo}`;
+          bannerRestriccion.style.display = 'flex';
+        }
+        btnGuardar.style.display = 'flex';
+        btnGuardar.disabled = true;
+        btnGuardar.style.opacity = '0.55';
+        btnGuardar.style.cursor = 'not-allowed';
+        btnGuardar.innerHTML = `<i class="bi bi-lock-fill"></i><span>Edición Bloqueada (Fuera de Turno)</span>`;
+      } else {
+        if (bannerRestriccion) bannerRestriccion.style.display = 'none';
+        btnGuardar.style.display = 'flex';
+        btnGuardar.disabled = false;
+        btnGuardar.style.opacity = '1';
+        btnGuardar.style.cursor = 'pointer';
+        if (!esModoEdicion) {
+          btnGuardar.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i><span>Guardar Asistencia</span>`;
+        }
+      }
+
+      const claseBotones = !validacion.permitido ? 'botones-asistencia bloqueado' : 'botones-asistencia';
 
       alumnos.forEach((al, index) => {
         const card = document.createElement('div');
@@ -2215,7 +2342,7 @@
               ${renderObsBadge(al.observacion, index)}
             </div>
           </div>
-          <div class="botones-asistencia">
+          <div class="${claseBotones}">
             <button type="button" id="btnP_${index}" class="btn-asistencia presente seleccionado" onclick="marcar(${index}, 'Presente')">P</button>
             <button type="button" id="btnT_${index}" class="btn-asistencia tardanza no-seleccionado" onclick="marcar(${index}, 'Tardanza')">T</button>
             <button type="button" id="btnA_${index}" class="btn-asistencia ausente no-seleccionado" onclick="marcar(${index}, 'Ausente')">A</button>
@@ -2234,6 +2361,13 @@
       const turno = document.getElementById('selectTurno').value.trim();
       const fechaStr = document.getElementById('inputFecha').value;
       const fechaFormateada = getFechaFormateada(fechaStr);
+
+      const validacion = validarVentanaHorariaTurno(turno, fechaStr);
+      if (!validacion.permitido) {
+        vibrar(30);
+        mostrarToast("Bloqueado: " + validacion.motivo, "error");
+        return;
+      }
 
       if (!APP_DATA || !APP_DATA.asistenciasHoy) return;
       const match = APP_DATA.asistenciasHoy.find(a => 
@@ -2656,6 +2790,16 @@
       const btn = document.getElementById('btnGuardar');
       const fechaFormateada = getFechaFormateada(fechaOriginal);
 
+      // Verificación estricta de ventana horaria y fecha
+      const validacion = validarVentanaHorariaTurno(turno, fechaOriginal);
+      if (!validacion.permitido) {
+        vibrar(30);
+        mostrarToast("Bloqueado: " + validacion.motivo, "error");
+        btn.disabled = true;
+        btn.innerHTML = `<i class="bi bi-lock-fill"></i><span>Edición Bloqueada</span>`;
+        return;
+      }
+
       btn.disabled = true;
       btn.innerHTML = `<span class="loading-pulse"></span><span>${esModoEdicion ? 'Actualizando asistencia...' : 'Guardando asistencia...'}</span>`;
 
@@ -2700,7 +2844,8 @@
         docente: docente,
         fechaElegida: fechaFormateada,
         turnoElegido: turno,
-        sobrescribir: esModoEdicion
+        sobrescribir: esModoEdicion,
+        esJefatura: esJefeAutenticado()
       };
 
       const onExito = (resData, fueOffline = false) => {
@@ -2794,7 +2939,7 @@
             guardarEnColaOffline(payload, comprobanteData);
             onExito("⚠️ Sin respuesta del servidor. Guardado localmente en este dispositivo.", true);
           })
-          .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno, esModoEdicion);
+          .guardarAsistencia(alumnosActuales, docente, fechaFormateada, turno, esModoEdicion, esJefeAutenticado());
         return;
       }
 
@@ -2897,6 +3042,12 @@
       }
       detAus.innerHTML = resumenHTML;
 
+      // Restricción WhatsApp: SOLO para el Jefe de Taller
+      const btnWA = document.getElementById('btnCompartirWhatsApp');
+      if (btnWA) {
+        btnWA.style.display = esJefeAutenticado() ? 'flex' : 'none';
+      }
+
       document.getElementById('modalComprobante').style.display = 'flex';
     }
 
@@ -2934,6 +3085,10 @@
     }
 
     function compartirComprobanteWhatsApp() {
+      if (!esJefeAutenticado()) {
+        mostrarToast("Solo Jefatura de Taller tiene autorización para emitir partes vía WhatsApp.", "error");
+        return;
+      }
       vibrar(15);
       const texto = armarTextoResumenComprobante();
       if (!texto) return;
@@ -3263,6 +3418,62 @@
 
       vibrar(20);
       window.print();
+    }
+
+    /**
+     * Permite a Jefatura de Taller redactar y enviar a Preceptoría el parte general consolidado del turno.
+     */
+    function compartirResumenTurnoWhatsApp() {
+      vibrar(15);
+      const fechaVal = document.getElementById('jefaturaInputFecha').value;
+      const turnoVal = document.getElementById('jefaturaSelectTurno').value;
+      const fechaStd = getFechaFormateada(fechaVal);
+      const diaSemana = getDiaSemana(fechaVal);
+
+      const totalTalleres = document.getElementById('jefTotalCursos').textContent || '0';
+      const tomados = document.getElementById('jefCursosCompletados').textContent || '0';
+      const pendientes = document.getElementById('jefCursosPendientes').textContent || '0';
+      const presentes = document.getElementById('jefAlumnosPresentes').textContent || '0';
+      const ausentes = document.getElementById('jefAlumnosAusentes').textContent || '0';
+      const epp = document.getElementById('jefAlertasEPP').textContent || '0';
+
+      const asistenciasHoy = APP_DATA ? APP_DATA.asistenciasHoy : [];
+
+      let msg = `📋 *PARTE OFICIAL DE JEFATURA DE TALLER*\n`;
+      msg += `🏫 *E.E.T. N° 6* • Ciclo 2026\n`;
+      msg += `📅 *Fecha:* ${fechaStd} (${diaSemana}) • *Turno:* ${turnoVal}\n\n`;
+
+      msg += `📊 *ESTADO GENERAL DEL TURNO:*\n`;
+      msg += `🔧 Talleres programados: ${totalTalleres}\n`;
+      msg += `🟢 Asistencias registradas: ${tomados}\n`;
+      if (Number(pendientes) > 0) {
+        msg += `🔴 Talleres pendientes: ${pendientes}\n`;
+      }
+      msg += `👥 Alumnos en taller: ${presentes} presentes\n`;
+      msg += `❌ Inasistencias totales: ${ausentes} ausentes\n`;
+      if (Number(epp) > 0) {
+        msg += `⚠️ Novedades de Seguridad / EPP: ${epp}\n`;
+      }
+
+      msg += `\n📝 *DETALLE DE ASISTENCIAS CARGADAS:*\n`;
+      let hayDetalle = false;
+      asistenciasHoy.forEach(a => {
+        if (getFechaFormateada(a.fecha) === fechaStd && normalizarStr(a.turno) === normalizarStr(turnoVal)) {
+          hayDetalle = true;
+          const ausList = (a.alumnos || []).filter(x => x.estado === 'Ausente').map(x => x.nombre);
+          const ausStr = ausList.length > 0 ? ` [Aus: ${ausList.join(', ')}]` : '';
+          msg += `• *${a.curso}* (${a.taller}): ${a.presentes}P / ${a.ausentes}A - Prof. ${a.docente}${ausStr}\n`;
+        }
+      });
+
+      if (!hayDetalle) {
+        msg += `_Sin asistencias registradas aún para este turno._\n`;
+      }
+
+      msg += `\n_Emitido desde Jefatura de Taller - Sistema Digital EET6_`;
+
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
     }
 
     function abrirModalHistorial() {

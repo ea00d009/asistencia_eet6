@@ -62,7 +62,8 @@ function doPost(e) {
       payload.docente,
       payload.fechaElegida,
       payload.turnoElegido,
-      payload.sobrescribir === true || payload.sobrescribir === "true"
+      payload.sobrescribir === true || payload.sobrescribir === "true",
+      payload.esJefatura === true || payload.esJefatura === "true"
     );
     
     const timestamp = Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yyyy HH:mm:ss");
@@ -347,7 +348,7 @@ function getAsistenciasPorFecha(fechaConsultada) {
 /**
  * Guarda o actualiza el lote completo de asistencia en la planilla de Sheets.
  */
-function guardarAsistencia(registros, docente, fechaElegida, turnoElegido, sobrescribir = false) {
+function guardarAsistencia(registros, docente, fechaElegida, turnoElegido, sobrescribir = false, esJefatura = false) {
   try {
     if (!registros || !Array.isArray(registros) || registros.length === 0) {
       throw new Error("No hay alumnos para registrar.");
@@ -358,6 +359,12 @@ function guardarAsistencia(registros, docente, fechaElegida, turnoElegido, sobre
     if (!sheet) throw new Error("No existe la pestaña 'Asistencia_Historica'.");
     
     const fechaNormalizada = estandarizarFecha(fechaElegida) || Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yy");
+    const hoyStr = Utilities.formatDate(new Date(), "GMT-3", "dd/MM/yy");
+
+    // Bloqueo de seguridad: Los profesores no pueden registrar ni modificar días anteriores
+    if (!esJefatura && fechaNormalizada !== hoyStr) {
+      throw new Error("No se permite registrar ni modificar asistencias de días anteriores.");
+    }
     
     // Si se solicitó sobrescribir, buscar y eliminar las filas previamente guardadas para este grupo
     if (sobrescribir && sheet.getLastRow() >= 2) {
