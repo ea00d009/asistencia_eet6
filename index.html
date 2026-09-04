@@ -575,8 +575,48 @@
       border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 14px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .history-student-pill {
+      font-size: 0.78rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    .history-student-pill.presente {
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .history-student-pill.tardanza {
+      background: rgba(245, 158, 11, 0.15);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .history-student-pill.ausente {
+      background: rgba(239, 68, 68, 0.12);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    [data-theme="dark"] .history-student-pill.presente {
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+    [data-theme="dark"] .history-student-pill.tardanza {
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.2);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+    [data-theme="dark"] .history-student-pill.ausente {
+      color: #f87171;
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.35);
     }
 
     /* Notificación Toast */
@@ -3843,9 +3883,6 @@
 
     function abrirModalHistorial() {
       vibrar(10);
-      const fechaOriginal = document.getElementById('inputFecha').value;
-      const fechaFormateada = getFechaFormateada(fechaOriginal);
-      document.getElementById('txtFechaHistorial').textContent = `Fecha: ${fechaFormateada}`;
       document.getElementById('modalHistorial').style.display = 'flex';
       renderizarListaHistorial(APP_DATA ? APP_DATA.asistenciasHoy : []);
     }
@@ -3858,7 +3895,7 @@
       const fechaOriginal = document.getElementById('inputFecha').value;
       const fechaFormateada = getFechaFormateada(fechaOriginal);
       const cont = document.getElementById('listaHistorialContenido');
-      cont.innerHTML = '<p class="text-center text-muted py-3"><span class="loading-pulse"></span> Buscando en la planilla...</p>';
+      cont.innerHTML = '<p class="text-center text-muted py-3"><span class="loading-pulse"></span> Consultando registros en la planilla...</p>';
 
       if (typeof google !== 'undefined' && google.script && google.script.run) {
         google.script.run
@@ -3889,40 +3926,251 @@
 
     function renderizarListaHistorial(lista) {
       const cont = document.getElementById('listaHistorialContenido');
+      const fechaOriginal = document.getElementById('inputFecha').value;
+      const fechaFormateada = getFechaFormateada(fechaOriginal);
+      const docenteActivo = document.getElementById('selectDocente').value.trim();
+      const cursoActivo = document.getElementById('selectCurso').value.trim();
+      const turnoActivo = document.getElementById('selectTurno').value.trim();
+
+      // Subtítulo con los filtros activos del docente
+      let txtSubtitulo = `Fecha: <strong>${fechaFormateada}</strong>`;
+      if (docenteActivo) txtSubtitulo += ` &bull; Prof. <strong>${docenteActivo}</strong>`;
+      if (cursoActivo) txtSubtitulo += ` &bull; <strong>${cursoActivo}</strong>`;
+      if (turnoActivo) txtSubtitulo += ` &bull; Turno <strong>${turnoActivo}</strong>`;
+      document.getElementById('txtFechaHistorial').innerHTML = txtSubtitulo;
+
       if (!lista || lista.length === 0) {
         cont.innerHTML = `
           <div class="text-center py-4 text-muted">
             <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-            No se han registrado asistencias para esta fecha todavía.
+            No se han registrado asistencias para la fecha <strong>${fechaFormateada}</strong> todavía.
           </div>
         `;
         return;
       }
 
-      cont.innerHTML = lista.map((g) => {
+      // 1. Filtrar por fecha
+      let filtrados = lista.filter(g => getFechaFormateada(g.fecha) === fechaFormateada);
+
+      // 2. Filtrar por docente activo (si está seleccionado)
+      if (docenteActivo) {
+        filtrados = filtrados.filter(g => normalizarStr(g.docente) === normalizarStr(docenteActivo));
+      }
+
+      // 3. Filtrar por curso y turno activo (si está seleccionado en pantalla)
+      if (cursoActivo) {
+        const filtradosExactos = filtrados.filter(g => 
+          normalizarStr(g.curso) === normalizarStr(cursoActivo) && 
+          normalizarStr(g.turno) === normalizarStr(turnoActivo)
+        );
+
+        if (filtradosExactos.length > 0) {
+          filtrados = filtradosExactos;
+        } else {
+          // No hay registro para este curso y turno específico
+          cont.innerHTML = `
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-clipboard-x fs-1 text-warning d-block mb-2"></i>
+              <div class="fw-bold text-main">Sin asistencia registrada aún para este curso y turno</div>
+              <div class="small mt-1">No se encontró registro guardado para <strong>${cursoActivo}</strong> (Turno ${turnoActivo}) &bull; Prof. ${docenteActivo || 'seleccionado/a'} en la fecha ${fechaFormateada}.</div>
+              ${filtrados.length > 0 ? `
+                <div class="mt-3">
+                  <button type="button" class="btn btn-outline-primary btn-sm" onclick="renderizarListaHistorialTodosDocente()">
+                    <i class="bi bi-eye"></i> Ver los otros ${filtrados.length} talleres registrados hoy por este/a docente
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+          return;
+        }
+      }
+
+      if (filtrados.length === 0) {
+        cont.innerHTML = `
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-person-x fs-2 d-block mb-2"></i>
+            No se encontraron asistencias registradas para ${docenteActivo ? `<strong>Prof. ${docenteActivo}</strong>` : 'este criterio'} en esta fecha.
+          </div>
+        `;
+        return;
+      }
+
+      cont.innerHTML = filtrados.map((g) => {
         let nombreTaller = g.taller ? g.taller.trim() : "";
         if (!nombreTaller) {
           nombreTaller = obtenerTallerDeRegistros(g.docente, g.curso, g.turno);
         }
-        const displayTaller = nombreTaller ? nombreTaller : 'Taller';
+        const displayTaller = nombreTaller ? nombreTaller : 'Taller Técnico';
+
+        const alumnos = g.alumnos || [];
+        const presentesList = alumnos.filter(a => a.estado === 'Presente');
+        const tardanzasList = alumnos.filter(a => a.estado === 'Tardanza');
+        const ausentesList = alumnos.filter(a => a.estado === 'Ausente');
 
         return `
         <div class="history-card">
-          <div class="d-flex justify-content-between align-items-start mb-1">
+          <!-- Cabecera del Taller y Docente -->
+          <div class="d-flex justify-content-between align-items-start mb-2">
             <div>
-              <div class="fw-bold fs-6">${g.curso} &bull; ${displayTaller}</div>
-              <div class="text-muted small"><i class="bi bi-person-fill"></i> ${g.docente} (${g.turno})</div>
+              <div class="fw-bold fs-6 text-primary">${g.curso} &bull; ${displayTaller}</div>
+              <div class="text-muted small">
+                <i class="bi bi-person-badge-fill"></i> Prof. ${g.docente} &bull; <i class="bi bi-sun"></i> Turno ${g.turno}
+              </div>
             </div>
-            <span class="badge bg-primary text-white">${g.total} alumnos</span>
+            <span class="badge bg-primary text-white fw-bold px-2 py-1">${g.total} alumnos</span>
           </div>
-          <div class="d-flex gap-2 mt-2 pt-2 border-top">
-            <span class="small text-success fw-bold"><i class="bi bi-check-circle-fill"></i> ${g.presentes} Pres</span>
-            <span class="small text-warning fw-bold"><i class="bi bi-exclamation-circle-fill"></i> ${g.tardanzas} Tard</span>
-            <span class="small text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> ${g.ausentes} Aus</span>
+
+          <!-- Resumen con número y color -->
+          <div class="d-flex gap-2 mb-3 p-2 rounded-3" style="background: var(--bg-surface); border: 1px solid var(--card-border);">
+            <span class="badge bg-success-subtle text-success fw-bold px-2 py-1 d-flex align-items-center gap-1">
+              <i class="bi bi-check-circle-fill"></i> ${g.presentes} Pres
+            </span>
+            <span class="badge bg-warning-subtle text-warning-emphasis fw-bold px-2 py-1 d-flex align-items-center gap-1">
+              <i class="bi bi-clock-fill text-warning"></i> ${g.tardanzas} Tard
+            </span>
+            <span class="badge bg-danger-subtle text-danger fw-bold px-2 py-1 d-flex align-items-center gap-1">
+              <i class="bi bi-x-circle-fill"></i> ${g.ausentes} Aus
+            </span>
+          </div>
+
+          <!-- Listado detallado debajo del resumen -->
+          <div class="history-students-details pt-2 border-top">
+            <!-- 1. Ausentes (siempre prioritario en visibilidad) -->
+            ${ausentesList.length > 0 ? `
+              <div class="mb-2">
+                <div class="small fw-bold text-danger d-flex align-items-center gap-1 mb-1">
+                  <i class="bi bi-x-circle-fill"></i> Ausentes (${ausentesList.length}):
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                  ${ausentesList.map(a => `
+                    <span class="history-student-pill ausente">
+                      ${a.nombre} ${a.observacion ? `<small class="opacity-75">(${a.observacion})</small>` : ''}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- 2. Tardanzas (si hay) -->
+            ${tardanzasList.length > 0 ? `
+              <div class="mb-2">
+                <div class="small fw-bold text-warning-emphasis d-flex align-items-center gap-1 mb-1">
+                  <i class="bi bi-clock-fill text-warning"></i> Tardanzas (${tardanzasList.length}):
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                  ${tardanzasList.map(a => `
+                    <span class="history-student-pill tardanza">
+                      ${a.nombre} ${a.observacion ? `<small class="opacity-75">(${a.observacion})</small>` : ''}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- 3. Presentes -->
+            <div class="mb-1">
+              <div class="small fw-bold text-success d-flex align-items-center gap-1 mb-1">
+                <i class="bi bi-check-circle-fill"></i> Presentes (${presentesList.length}):
+              </div>
+              <div class="d-flex flex-wrap gap-1">
+                ${presentesList.length > 0 ? presentesList.map(a => `
+                  <span class="history-student-pill presente">
+                    ${a.nombre} ${a.observacion ? `<small class="opacity-75">(${a.observacion})</small>` : ''}
+                  </span>
+                `).join('') : '<span class="small text-muted fst-italic">Sin presentes registrados.</span>'}
+              </div>
+            </div>
           </div>
         </div>
       `;
       }).join('');
+    }
+
+    function renderizarListaHistorialTodosDocente() {
+      const cont = document.getElementById('listaHistorialContenido');
+      const fechaOriginal = document.getElementById('inputFecha').value;
+      const fechaFormateada = getFechaFormateada(fechaOriginal);
+      const docenteActivo = document.getElementById('selectDocente').value.trim();
+
+      const lista = APP_DATA ? APP_DATA.asistenciasHoy : [];
+      let filtrados = lista.filter(g => 
+        getFechaFormateada(g.fecha) === fechaFormateada && 
+        normalizarStr(g.docente) === normalizarStr(docenteActivo)
+      );
+
+      document.getElementById('txtFechaHistorial').innerHTML = `Fecha: <strong>${fechaFormateada}</strong> &bull; Prof. <strong>${docenteActivo}</strong> (Todos sus talleres)`;
+      
+      const htmlCards = filtrados.map((g) => {
+        let nombreTaller = g.taller ? g.taller.trim() : (obtenerTallerDeRegistros(g.docente, g.curso, g.turno) || 'Taller Técnico');
+        const alumnos = g.alumnos || [];
+        const presentesList = alumnos.filter(a => a.estado === 'Presente');
+        const tardanzasList = alumnos.filter(a => a.estado === 'Tardanza');
+        const ausentesList = alumnos.filter(a => a.estado === 'Ausente');
+
+        return `
+        <div class="history-card">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <div class="fw-bold fs-6 text-primary">${g.curso} &bull; ${nombreTaller}</div>
+              <div class="text-muted small">
+                <i class="bi bi-person-badge-fill"></i> Prof. ${g.docente} &bull; <i class="bi bi-sun"></i> Turno ${g.turno}
+              </div>
+            </div>
+            <span class="badge bg-primary text-white fw-bold px-2 py-1">${g.total} alumnos</span>
+          </div>
+          <div class="d-flex gap-2 mb-3 p-2 rounded-3" style="background: var(--bg-surface); border: 1px solid var(--card-border);">
+            <span class="badge bg-success-subtle text-success fw-bold px-2 py-1 d-flex align-items-center gap-1">
+              <i class="bi bi-check-circle-fill"></i> ${g.presentes} Pres
+            </span>
+            <span class="badge bg-warning-subtle text-warning-emphasis fw-bold px-2 py-1 d-flex align-items-center gap-1">
+              <i class="bi bi-clock-fill text-warning"></i> ${g.tardanzas} Tard
+            </span>
+            <span class="badge bg-danger-subtle text-danger fw-bold px-2 py-1 d-flex align-items-center gap-1">
+              <i class="bi bi-x-circle-fill"></i> ${g.ausentes} Aus
+            </span>
+          </div>
+          <div class="history-students-details pt-2 border-top">
+            ${ausentesList.length > 0 ? `
+              <div class="mb-2">
+                <div class="small fw-bold text-danger d-flex align-items-center gap-1 mb-1">
+                  <i class="bi bi-x-circle-fill"></i> Ausentes (${ausentesList.length}):
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                  ${ausentesList.map(a => `
+                    <span class="history-student-pill ausente">${a.nombre} ${a.observacion ? `<small class="opacity-75">(${a.observacion})</small>` : ''}</span>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+            ${tardanzasList.length > 0 ? `
+              <div class="mb-2">
+                <div class="small fw-bold text-warning-emphasis d-flex align-items-center gap-1 mb-1">
+                  <i class="bi bi-clock-fill text-warning"></i> Tardanzas (${tardanzasList.length}):
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                  ${tardanzasList.map(a => `
+                    <span class="history-student-pill tardanza">${a.nombre} ${a.observacion ? `<small class="opacity-75">(${a.observacion})</small>` : ''}</span>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+            <div class="mb-1">
+              <div class="small fw-bold text-success d-flex align-items-center gap-1 mb-1">
+                <i class="bi bi-check-circle-fill"></i> Presentes (${presentesList.length}):
+              </div>
+              <div class="d-flex flex-wrap gap-1">
+                ${presentesList.map(a => `
+                  <span class="history-student-pill presente">${a.nombre} ${a.observacion ? `<small class="opacity-75">(${a.observacion})</small>` : ''}</span>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+        `;
+      }).join('');
+
+      cont.innerHTML = htmlCards;
     }
 
     let toastTimer = null;
